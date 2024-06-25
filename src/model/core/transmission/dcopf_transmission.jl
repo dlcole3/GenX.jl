@@ -22,7 +22,7 @@ Finally, we enforce the reference voltage phase angle constraint:
 ```
 
 """
-function dcopf_transmission!(EP::Model, inputs::Dict, setup::Dict)
+function dcopf_transmission!(EP, inputs::Dict, setup::Dict)
     println("DC-OPF Module")
 
     T = inputs["T"]     # Number of time steps (hours)
@@ -31,7 +31,7 @@ function dcopf_transmission!(EP::Model, inputs::Dict, setup::Dict)
 
     ### DC-OPF variables ###
 
-    # Voltage angle variables of each zone "z" at hour "t" 
+    # Voltage angle variables of each zone "z" at hour "t"
     @variable(EP, vANGLE[z = 1:Z, t = 1:T])
 
     ### DC-OPF constraints ###

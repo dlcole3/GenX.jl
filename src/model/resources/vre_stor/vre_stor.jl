@@ -1,38 +1,38 @@
 @doc raw"""
-	vre_stor!(EP::Model, inputs::Dict, setup::Dict)
+	vre_stor!(EP, inputs::Dict, setup::Dict)
 
-This module enables the modeling of 1) co-located VRE and energy storage technologies, 
-and 2) optimized interconnection sizing for VREs. Utility-scale solar PV and/or wind VRE technologies 
-can be modeled at the same site with or without storage technologies. Storage resources 
-can be charged/discharged behind the meter through the inverter (DC) and through AC charging/discharging 
-capabilities. Each resource can be configured to have any combination of the following components: 
-solar PV, wind, DC discharging/charging storage, and AC discharging/charging storage resources. For 
-storage resources, both long duration energy storage and short-duration energy storage can be modeled, 
-via asymmetric or symmetric charging and discharging options. Each resource connects 
-to the grid via a grid connection component, which is the only required decision variable 
-that each resource must have. If the configured resource has either solar PV and/or DC discharging/charging 
-storage capabilities, an inverter decision variable is also created. The full module with the decision 
-variables and interactions can be found below. 
+This module enables the modeling of 1) co-located VRE and energy storage technologies,
+and 2) optimized interconnection sizing for VREs. Utility-scale solar PV and/or wind VRE technologies
+can be modeled at the same site with or without storage technologies. Storage resources
+can be charged/discharged behind the meter through the inverter (DC) and through AC charging/discharging
+capabilities. Each resource can be configured to have any combination of the following components:
+solar PV, wind, DC discharging/charging storage, and AC discharging/charging storage resources. For
+storage resources, both long duration energy storage and short-duration energy storage can be modeled,
+via asymmetric or symmetric charging and discharging options. Each resource connects
+to the grid via a grid connection component, which is the only required decision variable
+that each resource must have. If the configured resource has either solar PV and/or DC discharging/charging
+storage capabilities, an inverter decision variable is also created. The full module with the decision
+variables and interactions can be found below.
 
 ![Configurable Co-located VRE and Storage Module Interactions and Decision Variables](../../assets/vre_stor_module.png)
 *Figure. Configurable Co-located VRE and Storage Module Interactions and Decision Variables*
 
-This module is split such that functions are called for each configurable component of a co-located resource: 
-    ```inverter_vre_stor()```, ```solar_vre_stor!()```, ```wind_vre_stor!()```, ```stor_vre_stor!()```, ```lds_vre_stor!()```, 
-    and ```investment_charge_vre_stor!()```. The function ```vre_stor!()``` specifically ensures 
-    that all necessary functions are called to activate the appropriate constraints, creates constraints that apply to 
-    multiple components (i.e. inverter and grid connection balances and maximums), and activates all of the policies 
+This module is split such that functions are called for each configurable component of a co-located resource:
+    ```inverter_vre_stor()```, ```solar_vre_stor!()```, ```wind_vre_stor!()```, ```stor_vre_stor!()```, ```lds_vre_stor!()```,
+    and ```investment_charge_vre_stor!()```. The function ```vre_stor!()``` specifically ensures
+    that all necessary functions are called to activate the appropriate constraints, creates constraints that apply to
+    multiple components (i.e. inverter and grid connection balances and maximums), and activates all of the policies
     that have been created (minimum capacity requirements, maximum capacity requirements, capacity reserve margins, operating reserves, and
-    energy share requirements can all be turned on for this module). Note that not all of these variables are indexed by each co-located VRE and storage resource (for example, some co-located resources 
-    may only have a solar PV component and battery technology or just a wind component). Thus, the function ```vre_stor!()``` 
-    ensures indexing issues do not arise across the various potential configurations of co-located VRE and storage 
-    module but showcases all constraints as if each decision variable (that may be only applicable to certain components) 
-    is indexed by each $y \in \mathcal{VS}$ for readability. 
+    energy share requirements can all be turned on for this module). Note that not all of these variables are indexed by each co-located VRE and storage resource (for example, some co-located resources
+    may only have a solar PV component and battery technology or just a wind component). Thus, the function ```vre_stor!()```
+    ensures indexing issues do not arise across the various potential configurations of co-located VRE and storage
+    module but showcases all constraints as if each decision variable (that may be only applicable to certain components)
+    is indexed by each $y \in \mathcal{VS}$ for readability.
 
-The first constraint is created with the function ```vre_stor!()``` and exists for all resources, 
-    regardless of the VRE and storage components that each resource contains and regardless of the policies 
-    invoked for the module. This constraint represents the energy balance, ensuring net DC power (discharge 
-    of battery, PV generation, and charge of battery) and net AC power (discharge of battery, wind generation, 
+The first constraint is created with the function ```vre_stor!()``` and exists for all resources,
+    regardless of the VRE and storage components that each resource contains and regardless of the policies
+    invoked for the module. This constraint represents the energy balance, ensuring net DC power (discharge
+    of battery, PV generation, and charge of battery) and net AC power (discharge of battery, wind generation,
     and charge of battery) are equal to the technology's total discharging to and charging from the grid:
 
 ```math
@@ -42,9 +42,9 @@ The first constraint is created with the function ```vre_stor!()``` and exists f
 \end{aligned}
 ```
 
-The second constraint is also created with the function ```vre_stor!()``` and exists for all resources, 
-    regardless of the VRE and storage components that each resource contains. However, this constraint changes 
-    when either or both capacity reserve margins and operating reserves are activated. The following constraint 
+The second constraint is also created with the function ```vre_stor!()``` and exists for all resources,
+    regardless of the VRE and storage components that each resource contains. However, this constraint changes
+    when either or both capacity reserve margins and operating reserves are activated. The following constraint
     enforces that the maximum grid exports and imports must be less than the grid connection capacity (without any policies):
 
 ```math
@@ -78,7 +78,7 @@ The second constraint with both capacity reserve margins and operating reserves 
 
 The rest of the constraints are dependent upon specific configurable components within the module and are listed below.
 """
-function vre_stor!(EP::Model, inputs::Dict, setup::Dict)
+function vre_stor!(EP, inputs::Dict, setup::Dict)
     println("VRE-Storage Module")
 
     ### LOAD DATA ###
@@ -344,11 +344,11 @@ function vre_stor!(EP::Model, inputs::Dict, setup::Dict)
 end
 
 @doc raw"""
-    inverter_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
+    inverter_vre_stor!(EP, inputs::Dict, setup::Dict)
 
 This function defines the decision variables, expressions, and constraints for the inverter component of each co-located VRE and storage generator.
 
-The total inverter capacity of each resource is defined as the sum of the existing inverter capacity plus the newly invested inverter capacity 
+The total inverter capacity of each resource is defined as the sum of the existing inverter capacity plus the newly invested inverter capacity
     minus any retired inverter capacity:
 ```math
 \begin{aligned}
@@ -374,7 +374,7 @@ For resources where $\overline{\Omega^{inv}_{y,z}}$ and $\underline{\Omega^{inv}
 \end{aligned}
 ```
 
-The last constraint ensures that the maximum DC grid exports and imports must be less than the inverter capacity. Without any capacity reserve margin or 
+The last constraint ensures that the maximum DC grid exports and imports must be less than the inverter capacity. Without any capacity reserve margin or
     operating reserves, the constraint is:
 ```math
 \begin{aligned}
@@ -415,7 +415,7 @@ In addition, this function adds investment and fixed O&M related costs related t
 \end{aligned}
 ```
 """
-function inverter_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
+function inverter_vre_stor!(EP, inputs::Dict, setup::Dict)
     println("VRE-STOR Inverter Module")
 
     ### LOAD DATA ###
@@ -434,7 +434,7 @@ function inverter_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
     ### INVERTER VARIABLES ###
 
     @variables(EP, begin
-        # Inverter capacity 
+        # Inverter capacity
         vRETDCCAP[y in RET_CAP_DC] >= 0                         # Retired inverter capacity [MW AC]
         vDCCAP[y in NEW_CAP_DC] >= 0                            # New installed inverter capacity [MW AC]
     end)
@@ -512,18 +512,18 @@ function inverter_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
 end
 
 @doc raw"""
-    solar_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
+    solar_vre_stor!(EP, inputs::Dict, setup::Dict)
 
 This function defines the decision variables, expressions, and constraints for the solar PV component of each co-located VRE and storage generator.
 
-The total solar PV capacity of each resource is defined as the sum of the existing solar PV capacity plus the newly invested solar PV capacity 
+The total solar PV capacity of each resource is defined as the sum of the existing solar PV capacity plus the newly invested solar PV capacity
     minus any retired solar PV capacity:
 ```math
 \begin{aligned}
     & \Delta^{total, pv}_{y,z} = (\overline{\Delta^{pv}_{y,z}} + \Omega^{pv}_{y,z} - \Delta^{pv}_{y,z}) \quad \forall y \in \mathcal{VS}^{pv}, z \in \mathcal{Z}
 \end{aligned}
 ```
-        
+
 One cannot retire more solar PV capacity than existing solar PV capacity:
 ```math
 \begin{aligned}
@@ -531,7 +531,7 @@ One cannot retire more solar PV capacity than existing solar PV capacity:
         \hspace{4 cm} \forall y \in \mathcal{VS}^{pv}, z \in \mathcal{Z}
 \end{aligned}
 ```
-        
+
 For resources where $\overline{\Omega^{pv}_{y,z}}$ and $\underline{\Omega^{pv}_{y,z}}$ are defined, then we impose constraints on minimum and maximum capacity:
 ```math
 \begin{aligned}
@@ -541,23 +541,23 @@ For resources where $\overline{\Omega^{pv}_{y,z}}$ and $\underline{\Omega^{pv}_{
         \hspace{4 cm}  \forall y \in \mathcal{VS}^{pv}, z \in \mathcal{Z}
 \end{aligned}
 ```
-        
-If there is a fixed ratio for capacity (rather than co-optimizing interconnection sizing) of solar PV built to capacity of 
+
+If there is a fixed ratio for capacity (rather than co-optimizing interconnection sizing) of solar PV built to capacity of
     inverter built ($\eta_{y,z}^{ILR,pv}$), also known as the inverter loading ratio, then we impose the following constraint:
 ```math
 \begin{aligned}
     & \Delta^{total, pv}_{y, z} = \eta^{ILR,pv}_{y, z} \times \Delta^{total, inv}_{y, z} \quad \forall y \in \mathcal{VS}^{pv}, \forall z \in Z
 \end{aligned}
 ```
-The last constraint defines the maximum power output in each time step from the solar PV component. Without any  
+The last constraint defines the maximum power output in each time step from the solar PV component. Without any
     operating reserves, the constraint is:
 ```math
 \begin{aligned}
     & \Theta^{pv}_{y, z, t} \leq \rho^{max, pv}_{y, z, t} \times \Delta^{total,pv}_{y, z} \quad \forall y \in \mathcal{VS}^{pv}, \forall z \in Z, \forall t \in T
 \end{aligned}
 ```
-        
-With operating reserves, the maximum power output in each time step from the solar PV component must account for procuring some of the available capacity for 
+
+With operating reserves, the maximum power output in each time step from the solar PV component must account for procuring some of the available capacity for
     frequency regulation ($f^{pv}_{y,z,t}$) and upward operating (spinning) reserves ($r^{pv}_{y,z,t}$):
 ```math
 \begin{aligned}
@@ -574,7 +574,7 @@ In addition, this function adds investment, fixed O&M, and variable O&M costs re
 \end{aligned}
 ```
 """
-function solar_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
+function solar_vre_stor!(EP, inputs::Dict, setup::Dict)
     println("VRE-STOR Solar Module")
 
     ### LOAD DATA ###
@@ -689,11 +689,11 @@ function solar_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
 end
 
 @doc raw"""
-    wind_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
+    wind_vre_stor!(EP, inputs::Dict, setup::Dict)
 
 This function defines the decision variables, expressions, and constraints for the wind component of each co-located VRE and storage generator.
 
-The total wind capacity of each resource is defined as the sum of the existing wind capacity plus the newly invested wind capacity 
+The total wind capacity of each resource is defined as the sum of the existing wind capacity plus the newly invested wind capacity
     minus any retired wind capacity:
 ```math
 \begin{aligned}
@@ -708,7 +708,7 @@ One cannot retire more wind capacity than existing wind capacity:
         \hspace{4 cm} \forall y \in \mathcal{VS}^{wind}, z \in \mathcal{Z}
 \end{aligned}
 ```
-        
+
 For resources where $\overline{\Omega^{wind}_{y,z}}$ and $\underline{\Omega^{wind}_{y,z}}$ are defined, then we impose constraints on minimum and maximum capacity:
 ```math
 \begin{aligned}
@@ -718,23 +718,23 @@ For resources where $\overline{\Omega^{wind}_{y,z}}$ and $\underline{\Omega^{win
         \hspace{4 cm}  \forall y \in \mathcal{VS}^{wind}, z \in \mathcal{Z}
 \end{aligned}
 ```
-        
-If there is a fixed ratio for capacity (rather than co-optimizing interconnection sizing) of wind built to capacity of grid connection built ($\eta_{y,z}^{ILR,wind}$), 
+
+If there is a fixed ratio for capacity (rather than co-optimizing interconnection sizing) of wind built to capacity of grid connection built ($\eta_{y,z}^{ILR,wind}$),
     then we impose the following constraint:
 ```math
 \begin{aligned}
     & \Delta^{total, wind}_{y, z} = \eta^{ILR,wind}_{y, z} \times \Delta^{total}_{y, z} \quad \forall y \in \mathcal{VS}^{wind}, \forall z \in Z
 \end{aligned}
 ```
-The last constraint defines the maximum power output in each time step from the wind component. Without any  
+The last constraint defines the maximum power output in each time step from the wind component. Without any
     operating reserves, the constraint is:
 ```math
 \begin{aligned}
     & \Theta^{wind}_{y, z, t} \leq \rho^{max, wind}_{y, z, t} \times \Delta^{total,wind}_{y, z} \quad \forall y \in \mathcal{VS}^{wind}, \forall z \in Z, \forall t \in T
 \end{aligned}
 ```
-        
-With operating reserves, the maximum power output in each time step from the wind component must account for procuring some of the available capacity for 
+
+With operating reserves, the maximum power output in each time step from the wind component must account for procuring some of the available capacity for
     frequency regulation ($f^{wind}_{y,z,t}$) and upward operating (spinning) reserves ($r^{wind}_{y,z,t}$):
 ```math
 \begin{aligned}
@@ -751,7 +751,7 @@ In addition, this function adds investment, fixed O&M, and variable O&M costs re
 \end{aligned}
 ```
 """
-function wind_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
+function wind_vre_stor!(EP, inputs::Dict, setup::Dict)
     println("VRE-STOR Wind Module")
 
     ### LOAD DATA ###
@@ -770,7 +770,7 @@ function wind_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
     ### WIND VARIABLES ###
 
     @variables(EP, begin
-        # Wind capacity 
+        # Wind capacity
         vRETWINDCAP[y in RET_CAP_WIND] >= 0                         # Retired wind capacity [MW AC]
         vWINDCAP[y in NEW_CAP_WIND] >= 0                            # New installed wind capacity [MW AC]
 
@@ -865,19 +865,19 @@ function wind_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
 end
 
 @doc raw"""
-    stor_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
+    stor_vre_stor!(EP, inputs::Dict, setup::Dict)
 
 This function defines the decision variables, expressions, and constraints for the storage component of each co-located VRE and storage generator.
-    A wide range of energy storage devices (all $y \in \mathcal{VS}^{stor}$) can be modeled in GenX, using one of two generic storage formulations: 
-    (1) storage technologies with symmetric charge and discharge capacity (all $y \in \mathcal{VS}^{sym,dc} \cup y \in \mathcal{VS}^{sym,ac}$), 
-    such as lithium-ion batteries and most other electrochemical storage devices that use the same components for both charge and discharge; and 
-    (2) storage technologies that employ distinct and potentially asymmetric charge and discharge capacities (all $y \in \mathcal{VS}^{asym,dc,dis} \cup 
-    y \in \mathcal{VS}^{asym,dc,cha} \cup y \in \mathcal{VS}^{asym,ac,dis} \cup y \in \mathcal{VS}^{asym,ac,cha}$), 
-    such as most thermal storage technologies or hydrogen electrolysis/storage/fuel cell or combustion turbine systems. The following constraints 
+    A wide range of energy storage devices (all $y \in \mathcal{VS}^{stor}$) can be modeled in GenX, using one of two generic storage formulations:
+    (1) storage technologies with symmetric charge and discharge capacity (all $y \in \mathcal{VS}^{sym,dc} \cup y \in \mathcal{VS}^{sym,ac}$),
+    such as lithium-ion batteries and most other electrochemical storage devices that use the same components for both charge and discharge; and
+    (2) storage technologies that employ distinct and potentially asymmetric charge and discharge capacities (all $y \in \mathcal{VS}^{asym,dc,dis} \cup
+    y \in \mathcal{VS}^{asym,dc,cha} \cup y \in \mathcal{VS}^{asym,ac,dis} \cup y \in \mathcal{VS}^{asym,ac,cha}$),
+    such as most thermal storage technologies or hydrogen electrolysis/storage/fuel cell or combustion turbine systems. The following constraints
     apply to all storage resources, $y \in \mathcal{VS}^{stor}$, regardless of whether or not the storage has symmetric or asymmetric
-    charging/discharging capabilities or varying durations of discharge. 
+    charging/discharging capabilities or varying durations of discharge.
 
-The total storage energy capacity of each resource is defined as the sum of the existing 
+The total storage energy capacity of each resource is defined as the sum of the existing
     storage energy capacity plus the newly invested storage energy capacity minus any retired storage energy capacity:
 ```math
 \begin{aligned}
@@ -892,7 +892,7 @@ One cannot retire more energy capacity than existing energy capacity:
             \hspace{4 cm}  \forall y \in \mathcal{VS}^{stor}, z \in \mathcal{Z}
 \end{aligned}
 ```
-        
+
 For resources where $\overline{\Omega_{y,z}^{energy}}$ and $\underline{\Omega_{y,z}^{energy}}$ are defined, then we impose constraints on minimum and maximum energy capacity:
 ```math
 \begin{aligned}
@@ -903,14 +903,14 @@ For resources where $\overline{\Omega_{y,z}^{energy}}$ and $\underline{\Omega_{y
 \end{aligned}
 ```
 
-The following two constraints track the state of charge of the storage resources at the end of each time period, relating the volume of energy stored at the end of the time period, $\Gamma_{y,z,t}$, 
-    to the state of charge at the end of the prior time period, $\Gamma_{y,z,t-1}$, the DC and AC charge and discharge decisions in the current time period, $\Pi^{dc}_{y,z,t}, \Pi^{ac}_{y,z,t}, \Theta^{dc}_{y,z,t}, \Theta^{ac}_{y,z,t}$, 
-    and the self discharge rate for the storage resource (if any), $\eta_{y,z}^{loss}$. When modeling the entire year as a single chronological period with total number of time steps of $\tau^{period}$, 
-    storage inventory in the first time step is linked to storage inventory at the last time step of the period representing the year. Alternatively, when modeling the entire year with multiple representative periods, 
-    this constraint relates storage inventory in the first timestep of the representative period with the inventory at the last time step of the representative period, where each representative period is made of 
-    $\tau^{period}$ time steps. In this implementation, energy exchange between representative periods is not permitted. When modeling representative time periods, GenX enables modeling of long duration 
-    energy storage which tracks state of charge between representative periods enable energy to be moved throughout the year. If there is more than one representative period and ```LDS_VRE_STOR=1``` has been enabled for 
-    resources in ```Vre_and_stor_data.csv```, this function calls ```lds_vre_stor!()``` to enable this feature. The first of these two constraints enforces storage inventory balance for interior time 
+The following two constraints track the state of charge of the storage resources at the end of each time period, relating the volume of energy stored at the end of the time period, $\Gamma_{y,z,t}$,
+    to the state of charge at the end of the prior time period, $\Gamma_{y,z,t-1}$, the DC and AC charge and discharge decisions in the current time period, $\Pi^{dc}_{y,z,t}, \Pi^{ac}_{y,z,t}, \Theta^{dc}_{y,z,t}, \Theta^{ac}_{y,z,t}$,
+    and the self discharge rate for the storage resource (if any), $\eta_{y,z}^{loss}$. When modeling the entire year as a single chronological period with total number of time steps of $\tau^{period}$,
+    storage inventory in the first time step is linked to storage inventory at the last time step of the period representing the year. Alternatively, when modeling the entire year with multiple representative periods,
+    this constraint relates storage inventory in the first timestep of the representative period with the inventory at the last time step of the representative period, where each representative period is made of
+    $\tau^{period}$ time steps. In this implementation, energy exchange between representative periods is not permitted. When modeling representative time periods, GenX enables modeling of long duration
+    energy storage which tracks state of charge between representative periods enable energy to be moved throughout the year. If there is more than one representative period and ```LDS_VRE_STOR=1``` has been enabled for
+    resources in ```Vre_and_stor_data.csv```, this function calls ```lds_vre_stor!()``` to enable this feature. The first of these two constraints enforces storage inventory balance for interior time
     steps $(t \in \mathcal{T}^{interior})$, while the second enforces storage balance constraint for the initial time step $(t \in \mathcal{T}^{start})$:
 ```math
 \begin{aligned}
@@ -921,18 +921,18 @@ The following two constraints track the state of charge of the storage resources
 \end{aligned}
 ```
 
-The last constraint limits the volume of energy stored at any time, $\Gamma_{y,z,t}$, to be less than the installed energy storage capacity, $\Delta^{total, energy}_{y,z}$. 
+The last constraint limits the volume of energy stored at any time, $\Gamma_{y,z,t}$, to be less than the installed energy storage capacity, $\Delta^{total, energy}_{y,z}$.
 ```math
 \begin{aligned}
 	&  \Gamma_{y,z,t} \leq \Delta^{total, energy}_{y,z} & \quad \forall y \in \mathcal{VS}^{stor}, z \in \mathcal{Z}, t \in \mathcal{T}
 \end{aligned}
 ```
-The next set of constraints only apply to symmetric storage resources (all $y \in \mathcal{VS}^{sym,dc} \cup y \in \mathcal{VS}^{sym,ac}$). 
-    For storage technologies with symmetric charge and discharge capacity (all $y \in \mathcal{VS}^{sym,dc}  \cup y \in \mathcal{VS}^{sym,ac}$), 
-    since storage resources generally represent a 'cluster' of multiple similar storage devices of the same type/cost in the same zone, GenX 
-    permits storage resources to simultaneously charge and discharge (as some units could be charging while others discharge). The 
-    simultaneous sum of DC and AC charge, $\Pi^{dc}_{y,z,t}, \Pi^{ac}_{y,z,t}$, and discharge, $\Theta^{dc}_{y,z,t}, \Theta^{ac}_{y,z,t}$, is limited 
-    by the total installed energy capacity, $\Delta^{total, energy}_{o,z}$, multiplied by the power to energy ratio, $\mu_{y,z}^{dc,stor}, 
+The next set of constraints only apply to symmetric storage resources (all $y \in \mathcal{VS}^{sym,dc} \cup y \in \mathcal{VS}^{sym,ac}$).
+    For storage technologies with symmetric charge and discharge capacity (all $y \in \mathcal{VS}^{sym,dc}  \cup y \in \mathcal{VS}^{sym,ac}$),
+    since storage resources generally represent a 'cluster' of multiple similar storage devices of the same type/cost in the same zone, GenX
+    permits storage resources to simultaneously charge and discharge (as some units could be charging while others discharge). The
+    simultaneous sum of DC and AC charge, $\Pi^{dc}_{y,z,t}, \Pi^{ac}_{y,z,t}$, and discharge, $\Theta^{dc}_{y,z,t}, \Theta^{ac}_{y,z,t}$, is limited
+    by the total installed energy capacity, $\Delta^{total, energy}_{o,z}$, multiplied by the power to energy ratio, $\mu_{y,z}^{dc,stor},
     \mu_{y,z}^{ac,stor}$. Without any capacity reserve margin constraints or operating reserves, the symmetric AC and DC storage resources are constrained as:
 ```math
 \begin{aligned}
@@ -941,8 +941,8 @@ The next set of constraints only apply to symmetric storage resources (all $y \i
 \end{aligned}
 ```
 
-Symmetric storage resources with only capacity reserve margin constraints follow a similar constraint that incorporates the 'virtual' discharging 
-    and charging that occurs and limits the simultaneously charging, discharging, virtual charging, and virtual discharging of the battery resource: 
+Symmetric storage resources with only capacity reserve margin constraints follow a similar constraint that incorporates the 'virtual' discharging
+    and charging that occurs and limits the simultaneously charging, discharging, virtual charging, and virtual discharging of the battery resource:
 ```math
 \begin{aligned}
     &  \Theta^{dc}_{y,z,t} + \Theta^{CRM,dc}_{y,z,t} + \Pi^{dc}_{y,z,t} + \Pi^{CRM,dc}_{y,z,t} \\
@@ -952,9 +952,9 @@ Symmetric storage resources with only capacity reserve margin constraints follow
 \end{aligned}
 ```
 
-Symmetric storage resources only subject to operating reserves have additional variables to represent contributions of frequency regulation and upwards operating reserves while the storage is charging DC or AC 
-    ($f^{dc,cha}_{y,z,t}, f^{ac,cha}_{y,z,t}$) and discharging DC or AC ($f^{dc,dis}_{y,z,t}, f^{ac,dis}_{y,z,t}, r^{dc,dis}_{y,z,t}, r^{ac,dis}_{y,z,t}$). Note that as storage resources can contribute to regulation and 
-    reserves while either charging or discharging, the proxy variables $f^{dc,cha}_{y,z,t}, f^{ac,cha}_{y,z,t}, f^{dc,dis}_{y,z,t}, f^{ac,dis}_{y,z,t}, r^{dc,dis}_{y,z,t}, r^{ac,dis}_{y,z,t}$ are created for storage 
+Symmetric storage resources only subject to operating reserves have additional variables to represent contributions of frequency regulation and upwards operating reserves while the storage is charging DC or AC
+    ($f^{dc,cha}_{y,z,t}, f^{ac,cha}_{y,z,t}$) and discharging DC or AC ($f^{dc,dis}_{y,z,t}, f^{ac,dis}_{y,z,t}, r^{dc,dis}_{y,z,t}, r^{ac,dis}_{y,z,t}$). Note that as storage resources can contribute to regulation and
+    reserves while either charging or discharging, the proxy variables $f^{dc,cha}_{y,z,t}, f^{ac,cha}_{y,z,t}, f^{dc,dis}_{y,z,t}, f^{ac,dis}_{y,z,t}, r^{dc,dis}_{y,z,t}, r^{ac,dis}_{y,z,t}$ are created for storage
     components.
 ```math
 \begin{aligned}
@@ -975,7 +975,7 @@ For symmetric storage resources with both capacity reserve margin and operating 
 \end{aligned}
 ```
 
-Long duration energy storage constraints are activated by the function ```lds_vre_stor!()```. Asymmetric storage resource constraints are activated by the function 
+Long duration energy storage constraints are activated by the function ```lds_vre_stor!()```. Asymmetric storage resource constraints are activated by the function
     ```investment_charge_vre_stor!()```.
 
 In addition, this function adds investment, fixed O&M, and variable O&M costs related to the storage capacity to the objective function:
@@ -990,7 +990,7 @@ In addition, this function adds investment, fixed O&M, and variable O&M costs re
 \end{aligned}
 ```
 """
-function stor_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
+function stor_vre_stor!(EP, inputs::Dict, setup::Dict)
     println("VRE-STOR Storage Module")
 
     ### LOAD DATA ###
@@ -1283,15 +1283,15 @@ function stor_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
 end
 
 @doc raw"""
-    lds_vre_stor!(EP::Model, inputs::Dict)
+    lds_vre_stor!(EP, inputs::Dict)
 
-This function defines the decision variables, expressions, and constraints for any 
+This function defines the decision variables, expressions, and constraints for any
     long duration energy storage component of each co-located VRE and storage generator (
-    there is more than one representative period and ```LDS_VRE_STOR=1``` in the ```Vre_and_stor_data.csv```). 
+    there is more than one representative period and ```LDS_VRE_STOR=1``` in the ```Vre_and_stor_data.csv```).
 
-These constraints follow the same formulation that is outlined by the function ```long_duration_storage!()``` 
-    in the storage module. One constraint changes, which links the state of charge between the start of periods 
-    for long duration energy storage resources because there are options to charge and discharge these resources 
+These constraints follow the same formulation that is outlined by the function ```long_duration_storage!()```
+    in the storage module. One constraint changes, which links the state of charge between the start of periods
+    for long duration energy storage resources because there are options to charge and discharge these resources
     through AC and DC capabilities. The main linking constraint changes to:
 
 ```math
@@ -1301,12 +1301,12 @@ These constraints follow the same formulation that is outlined by the function `
     & + \eta_{y,z}^{charge,dc} \times \Pi^{dc}_{y,z,(m-1)\times \tau^{period}+1} + \eta_{y,z}^{charge,ac} \times \Pi^{ac}_{y,z,(m-1)\times \tau^{period}+1} \quad \forall y \in \mathcal{VS}^{LDES}, z \in \mathcal{Z}, m \in \mathcal{M}
 \end{aligned}
 ```
-    
-The rest of the long duration energy storage constraints are copied and applied to the co-located VRE and storage module for any 
-    long duration energy storage resources $y \in \mathcal{VS}^{LDES}$ from the long-duration storage module. Capacity reserve margin constraints for 
+
+The rest of the long duration energy storage constraints are copied and applied to the co-located VRE and storage module for any
+    long duration energy storage resources $y \in \mathcal{VS}^{LDES}$ from the long-duration storage module. Capacity reserve margin constraints for
     long duration energy storage resources are further elaborated upon in ```vre_stor_capres!()```.
 """
-function lds_vre_stor!(EP::Model, inputs::Dict)
+function lds_vre_stor!(EP, inputs::Dict)
     println("VRE-STOR LDS Module")
 
     ### LOAD DATA ###
@@ -1370,7 +1370,7 @@ function lds_vre_stor!(EP::Model, inputs::Dict)
         end
     end
 
-    ### CONSTRAINTS ### 
+    ### CONSTRAINTS ###
 
     # Constraint 1: Link the state of charge between the start of periods for LDS resources
     @constraint(EP, cVreStorSoCBalLongDurationStorageStart[y in VS_LDS, w = 1:REP_PERIOD],
@@ -1402,15 +1402,15 @@ function lds_vre_stor!(EP::Model, inputs::Dict)
 end
 
 @doc raw"""
-    investment_charge_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
+    investment_charge_vre_stor!(EP, inputs::Dict, setup::Dict)
 
 This function activates the decision variables and constraints for asymmetric storage resources (independent charge
-    and discharge power capacities (any STOR flag = 2)). For asymmetric storage resources, the function is enabled so charging 
-    and discharging can occur either through DC or AC capabilities. For example, a storage resource can be asymmetrically charged 
-    and discharged via DC capabilities or a storage resource could be charged via AC capabilities and discharged through DC capabilities. 
+    and discharge power capacities (any STOR flag = 2)). For asymmetric storage resources, the function is enabled so charging
+    and discharging can occur either through DC or AC capabilities. For example, a storage resource can be asymmetrically charged
+    and discharged via DC capabilities or a storage resource could be charged via AC capabilities and discharged through DC capabilities.
     This module is configured such that both AC and DC charging (or discharging) cannot simultaneously occur.
 
-The total charge/discharge DC and AC capacities of each resource are defined as the sum of the existing charge/discharge DC and AC capacities plus 
+The total charge/discharge DC and AC capacities of each resource are defined as the sum of the existing charge/discharge DC and AC capacities plus
     the newly invested charge/discharge DC and AC capacities minus any retired charge/discharge DC and AC capacities:
 
 ```math
@@ -1436,8 +1436,8 @@ One cannot retire more capacity than existing capacity:
 \end{aligned}
 ```
 
-For resources where $\overline{\Omega_{y,z}^{dc,dis}}, \overline{\Omega_{y,z}^{dc,cha}}, \overline{\Omega_{y,z}^{ac,dis}}, \overline{\Omega_{y,z}^{ac,cha}}$ 
-    and $\underline{\Omega_{y,z}^{dc,dis}}, \underline{\Omega_{y,z}^{dc,cha}}, \underline{\Omega_{y,z}^{ac,dis}}, \underline{\Omega_{y,z}^{ac, cha}}$ are defined, 
+For resources where $\overline{\Omega_{y,z}^{dc,dis}}, \overline{\Omega_{y,z}^{dc,cha}}, \overline{\Omega_{y,z}^{ac,dis}}, \overline{\Omega_{y,z}^{ac,cha}}$
+    and $\underline{\Omega_{y,z}^{dc,dis}}, \underline{\Omega_{y,z}^{dc,cha}}, \underline{\Omega_{y,z}^{ac,dis}}, \underline{\Omega_{y,z}^{ac, cha}}$ are defined,
     then we impose constraints on minimum and maximum charge/discharge DC and AC power capacity:
 ```math
 \begin{aligned}
@@ -1460,11 +1460,11 @@ For resources where $\overline{\Omega_{y,z}^{dc,dis}}, \overline{\Omega_{y,z}^{d
 \end{aligned}
 ```
 
-Furthermore, for storage technologies with asymmetric charge and discharge capacities (all $y \in \mathcal{VS}^{asym,dc,dis}, 
-    y \in \mathcal{VS}^{asym,dc,cha}, y \in \mathcal{VS}^{asym,ac,dis}, y \in \mathcal{VS}^{asym,ac,cha}$), the charge rate, 
-    $\Pi^{dc}_{y,z,t}, \Pi^{ac}_{y,z,t}$, is constrained by the total installed charge capacity, $\Delta^{total,dc,cha}_{y,z}, 
-    \Delta^{total,ac,cha}_{y,z}$. Similarly the discharge rate, $\Theta^{dc}_{y,z,t}, \Theta^{ac}_{y,z,t}$, is constrained by the 
-    total installed discharge capacity, $\Delta^{total,dc,dis}_{y,z}, \Delta^{total,ac,dis}_{y,z}$. Without any activated 
+Furthermore, for storage technologies with asymmetric charge and discharge capacities (all $y \in \mathcal{VS}^{asym,dc,dis},
+    y \in \mathcal{VS}^{asym,dc,cha}, y \in \mathcal{VS}^{asym,ac,dis}, y \in \mathcal{VS}^{asym,ac,cha}$), the charge rate,
+    $\Pi^{dc}_{y,z,t}, \Pi^{ac}_{y,z,t}$, is constrained by the total installed charge capacity, $\Delta^{total,dc,cha}_{y,z},
+    \Delta^{total,ac,cha}_{y,z}$. Similarly the discharge rate, $\Theta^{dc}_{y,z,t}, \Theta^{ac}_{y,z,t}$, is constrained by the
+    total installed discharge capacity, $\Delta^{total,dc,dis}_{y,z}, \Delta^{total,ac,dis}_{y,z}$. Without any activated
     capacity reserve margin policies or operating reserves, the constraints are as follows:
 ```math
 \begin{aligned}
@@ -1475,7 +1475,7 @@ Furthermore, for storage technologies with asymmetric charge and discharge capac
 \end{aligned}
 ```
 
-Adding only the capacity reserve margin constraints, the asymmetric charge and discharge DC and AC rates plus the 'virtual' charge and discharge DC and AC rates are 
+Adding only the capacity reserve margin constraints, the asymmetric charge and discharge DC and AC rates plus the 'virtual' charge and discharge DC and AC rates are
     constrained by the total installed charge and discharge DC and AC capacities:
 ```math
 \begin{aligned}
@@ -1486,7 +1486,7 @@ Adding only the capacity reserve margin constraints, the asymmetric charge and d
 \end{aligned}
 ```
 
-Adding only the operating reserve constraints, the asymmetric charge and discharge DC and AC rates plus the contributions to frequency regulation and operating reserves (both DC and AC) are 
+Adding only the operating reserve constraints, the asymmetric charge and discharge DC and AC rates plus the contributions to frequency regulation and operating reserves (both DC and AC) are
     constrained by the total installed charge and discharge DC and AC capacities:
 ```math
 \begin{aligned}
@@ -1497,7 +1497,7 @@ Adding only the operating reserve constraints, the asymmetric charge and dischar
 \end{aligned}
 ```
 
-With both capacity reserve margin and operating reserve constraints, the asymmetric charge and discharge DC and AC rate constraints follow: 
+With both capacity reserve margin and operating reserve constraints, the asymmetric charge and discharge DC and AC rate constraints follow:
 ```math
 \begin{aligned}
     &  \Theta^{dc}_{y,z,t} + \Theta^{CRM,dc}_{y,z,t} + f^{dc,dis}_{y,z,t} + r^{dc,dis}_{y,z,t} \leq \Delta^{total,dc,dis}_{y,z} \quad \forall y \in \mathcal{VS}^{asym,dc,dis}, z \in \mathcal{Z}, t \in \mathcal{T} \\
@@ -1525,7 +1525,7 @@ In addition, this function adds investment and fixed O&M costs related to charge
 \end{aligned}
 ```
 """
-function investment_charge_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
+function investment_charge_vre_stor!(EP, inputs::Dict, setup::Dict)
     println("VRE-STOR Charge Investment Module")
 
     ### LOAD INPUTS ###
@@ -1949,31 +1949,31 @@ function investment_charge_vre_stor!(EP::Model, inputs::Dict, setup::Dict)
 end
 
 @doc raw"""
-    vre_stor_capres!(EP::Model, inputs::Dict, setup::Dict)
+    vre_stor_capres!(EP, inputs::Dict, setup::Dict)
 
-This function activates capacity reserve margin constraints for co-located VRE and storage resources. The capacity reserve margin 
-    formulation for GenX is further elaborated upon in ```cap_reserve_margin!()```. For co-located resources ($y \in \mathcal{VS}$), 
-    the available capacity to contribute to the capacity reserve margin is the net injection into the transmission network (which 
-    can come from the solar PV, wind, and/or storage component) plus the net virtual injection corresponding to charge held in reserve 
-    (which can only come from the storage component), derated by the derating factor. If a capacity reserve margin is modeled, variables 
-    for virtual charge DC, $\Pi^{CRM, dc}_{y,z,t}$, virtual charge AC, $\Pi^{CRM, ac}_{y,z,t}$, virtual discharge DC, $\Theta^{CRM, dc}_{y,z,t}$, 
-    virtual discharge AC, $\Theta^{CRM, ac}_{o,z,t}$, and virtual state of charge, $\Gamma^{CRM}_{y,z,t}$, are created to represent contributions that a storage device makes to 
-    the capacity reserve margin without actually generating power. These represent power that the storage device could have discharged 
-    or consumed if called upon to do so, based on its available state of charge. Importantly, a dedicated set of variables 
-    and constraints are created to ensure that any virtual contributions to the capacity reserve margin could be made as 
-    actual charge/discharge if necessary without affecting system operations in any other timesteps (similar to the standalone 
-    storage capacity reserve margin constraints). 
+This function activates capacity reserve margin constraints for co-located VRE and storage resources. The capacity reserve margin
+    formulation for GenX is further elaborated upon in ```cap_reserve_margin!()```. For co-located resources ($y \in \mathcal{VS}$),
+    the available capacity to contribute to the capacity reserve margin is the net injection into the transmission network (which
+    can come from the solar PV, wind, and/or storage component) plus the net virtual injection corresponding to charge held in reserve
+    (which can only come from the storage component), derated by the derating factor. If a capacity reserve margin is modeled, variables
+    for virtual charge DC, $\Pi^{CRM, dc}_{y,z,t}$, virtual charge AC, $\Pi^{CRM, ac}_{y,z,t}$, virtual discharge DC, $\Theta^{CRM, dc}_{y,z,t}$,
+    virtual discharge AC, $\Theta^{CRM, ac}_{o,z,t}$, and virtual state of charge, $\Gamma^{CRM}_{y,z,t}$, are created to represent contributions that a storage device makes to
+    the capacity reserve margin without actually generating power. These represent power that the storage device could have discharged
+    or consumed if called upon to do so, based on its available state of charge. Importantly, a dedicated set of variables
+    and constraints are created to ensure that any virtual contributions to the capacity reserve margin could be made as
+    actual charge/discharge if necessary without affecting system operations in any other timesteps (similar to the standalone
+    storage capacity reserve margin constraints).
 
-If a capacity reserve margin is modeled, then the following constraints track the relationship between the virtual charge variables, 
-    $\Pi^{CRM,dc}_{y,z,t}, \Pi^{CRM,ac}_{y,z,t}$, virtual discharge variables, $\Theta^{CRM, dc}_{y,z,t}, \Theta^{CRM, ac}_{y,z,t}$, 
-    and the virtual state of charge, $\Gamma^{CRM}_{y,z,t}$, representing the amount of state of charge that must be held in reserve 
-    to enable these virtual capacity reserve margin contributions and ensuring that the storage device could deliver its pledged 
-    capacity if called upon to do so without affecting its operations in other timesteps. $\Gamma^{CRM}_{y,z,t}$ is tracked similarly 
-    to the devices' overall state of charge based on its value in the previous timestep and the virtual charge and discharge in the 
-    current timestep. Unlike the regular state of charge, virtual discharge $\Theta^{CRM,dc}_{y,z,t}, \Theta^{CRM,ac}_{y,z,t}$ increases 
-    $\Gamma^{CRM}_{y,z,t}$ (as more charge must be held in reserve to support more virtual discharge), and the virtual charge 
-    $\Pi^{CRM,dc}_{y,z,t}, \Pi^{CRM,ac}_{y,z,t}$ reduces $\Gamma^{CRM}_{y,z,t}$. Similar to the state of charge constraints in the 
-    ```stor_vre_stor!()``` function, the first of these two constraints enforces storage inventory balance for interior time 
+If a capacity reserve margin is modeled, then the following constraints track the relationship between the virtual charge variables,
+    $\Pi^{CRM,dc}_{y,z,t}, \Pi^{CRM,ac}_{y,z,t}$, virtual discharge variables, $\Theta^{CRM, dc}_{y,z,t}, \Theta^{CRM, ac}_{y,z,t}$,
+    and the virtual state of charge, $\Gamma^{CRM}_{y,z,t}$, representing the amount of state of charge that must be held in reserve
+    to enable these virtual capacity reserve margin contributions and ensuring that the storage device could deliver its pledged
+    capacity if called upon to do so without affecting its operations in other timesteps. $\Gamma^{CRM}_{y,z,t}$ is tracked similarly
+    to the devices' overall state of charge based on its value in the previous timestep and the virtual charge and discharge in the
+    current timestep. Unlike the regular state of charge, virtual discharge $\Theta^{CRM,dc}_{y,z,t}, \Theta^{CRM,ac}_{y,z,t}$ increases
+    $\Gamma^{CRM}_{y,z,t}$ (as more charge must be held in reserve to support more virtual discharge), and the virtual charge
+    $\Pi^{CRM,dc}_{y,z,t}, \Pi^{CRM,ac}_{y,z,t}$ reduces $\Gamma^{CRM}_{y,z,t}$. Similar to the state of charge constraints in the
+    ```stor_vre_stor!()``` function, the first of these two constraints enforces storage inventory balance for interior time
     steps $(t \in \mathcal{T}^{interior})$, while the second enforces storage balance constraint for the initial time step $(t \in \mathcal{T}^{start})$:
 ```math
 \begin{aligned}
@@ -1983,16 +1983,16 @@ If a capacity reserve margin is modeled, then the following constraints track th
     & - \eta_{y,z}^{loss} \times \Gamma^{CRM}_{y,z,t+\tau^{period}-1}  \quad \forall y \in \mathcal{VS}^{stor}, z \in \mathcal{Z}, t \in \mathcal{T}^{start}
 \end{aligned}
 ```
-The energy held in reserve, $\Gamma^{CRM}_{y,z,t}$, also acts as a lower bound on the overall state of charge $\Gamma_{y,z,t}$. This ensures 
-    that the storage device cannot use state of charge that would not have been available had it been called on to actually contribute its 
-    pledged virtual discharge at some earlier timestep. This relationship is described by the following constraint (as also outlined in 
+The energy held in reserve, $\Gamma^{CRM}_{y,z,t}$, also acts as a lower bound on the overall state of charge $\Gamma_{y,z,t}$. This ensures
+    that the storage device cannot use state of charge that would not have been available had it been called on to actually contribute its
+    pledged virtual discharge at some earlier timestep. This relationship is described by the following constraint (as also outlined in
     the storage module):
 ```math
 \begin{aligned}
 	&  \Gamma_{y,z,t} \geq \Gamma^{CRM}_{y,z,t} \quad \forall y \in \mathcal{VS}^{stor}, z \in \mathcal{Z}, t \in \mathcal{T} \\
 \end{aligned}
 ```
-The overall contribution of the co-located VRE and storage resources to the system's capacity reserve margin in timestep $t$ is equal to 
+The overall contribution of the co-located VRE and storage resources to the system's capacity reserve margin in timestep $t$ is equal to
     (including both actual and virtual DC and AC charge and discharge):
 ```math
 \begin{aligned}
@@ -2005,8 +2005,8 @@ The overall contribution of the co-located VRE and storage resources to the syst
 \end{aligned}
 ```
 
-If long duration energy storage resources exist, a separate but similar set of variables and constraints is used to track the evolution of energy held 
-    in reserves across representative periods, which is elaborated upon in the ```long_duration_storage!()``` function. 
+If long duration energy storage resources exist, a separate but similar set of variables and constraints is used to track the evolution of energy held
+    in reserves across representative periods, which is elaborated upon in the ```long_duration_storage!()``` function.
     The main linking constraint follows (due to the capabilities of virtual DC and AC discharging and charging):
 
 ```math
@@ -2018,10 +2018,10 @@ If long duration energy storage resources exist, a separate but similar set of v
 \end{aligned}
 ```
 
-All other constraints are identical to those used to track the actual state of charge, except with the new variables for the representation of 'virtual' 
-    state of charge, build up storage inventory and state of charge at the beginning of each period. 
+All other constraints are identical to those used to track the actual state of charge, except with the new variables for the representation of 'virtual'
+    state of charge, build up storage inventory and state of charge at the beginning of each period.
 """
-function vre_stor_capres!(EP::Model, inputs::Dict, setup::Dict)
+function vre_stor_capres!(EP, inputs::Dict, setup::Dict)
     println("VRE-STOR Capacity Reserve Margin Module")
 
     ### LOAD DATA ###
@@ -2374,12 +2374,12 @@ function vre_stor_capres!(EP::Model, inputs::Dict, setup::Dict)
 end
 
 @doc raw"""
-    vre_stor_operational_reserves!(EP::Model, inputs::Dict, setup::Dict)
+    vre_stor_operational_reserves!(EP, inputs::Dict, setup::Dict)
 
-This function activates either or both frequency regulation and operating reserve options for co-located 
-    VRE-storage resources. Co-located VRE and storage resources ($y \in \mathcal{VS}$) have six pairs of 
-    auxilary variables to reflect contributions to regulation and reserves when generating electricity from 
-    solar PV or wind resources, DC charging and discharging from storage resources, and AC charging and 
+This function activates either or both frequency regulation and operating reserve options for co-located
+    VRE-storage resources. Co-located VRE and storage resources ($y \in \mathcal{VS}$) have six pairs of
+    auxilary variables to reflect contributions to regulation and reserves when generating electricity from
+    solar PV or wind resources, DC charging and discharging from storage resources, and AC charging and
     discharging from storage resources. The primary variables ($f_{y,z,t}$ & $r_{y,z,t}$) becomes equal to the sum
     of these auxilary variables as follows:
 ```math
@@ -2400,10 +2400,10 @@ Furthermore, the frequency regulation and operating reserves require the maximum
     \end{aligned}
 ```
 
-The following constraints follow if the configurable co-located resource has any type of storage component. 
-    When charging, reducing the DC and AC charge rate is contributing to upwards reserve and frequency regulation as 
-    it drops net demand. As such, the sum of the DC and AC charge rate plus contribution to regulation and reserves 
-    up must be greater than zero. Additionally, the DC and AC discharge rate plus the contribution to regulation must 
+The following constraints follow if the configurable co-located resource has any type of storage component.
+    When charging, reducing the DC and AC charge rate is contributing to upwards reserve and frequency regulation as
+    it drops net demand. As such, the sum of the DC and AC charge rate plus contribution to regulation and reserves
+    up must be greater than zero. Additionally, the DC and AC discharge rate plus the contribution to regulation must
     be greater than zero:
 ```math
 \begin{aligned}
@@ -2414,10 +2414,10 @@ The following constraints follow if the configurable co-located resource has any
 \end{aligned}
 ```
 
-Additionally, when reserves are modeled, the maximum DC and AC charge rate and contribution to regulation while charging can be 
-    no greater than the available energy storage capacity, or the difference between the total energy storage capacity, 
-    $\Delta^{total, energy}_{y,z}$, and the state of charge at the end of the previous time period, $\Gamma_{y,z,t-1}$, 
-    while accounting for charging losses $\eta_{y,z}^{charge,dc}, \eta_{y,z}^{charge,ac}$. Note that for storage to contribute 
+Additionally, when reserves are modeled, the maximum DC and AC charge rate and contribution to regulation while charging can be
+    no greater than the available energy storage capacity, or the difference between the total energy storage capacity,
+    $\Delta^{total, energy}_{y,z}$, and the state of charge at the end of the previous time period, $\Gamma_{y,z,t-1}$,
+    while accounting for charging losses $\eta_{y,z}^{charge,dc}, \eta_{y,z}^{charge,ac}$. Note that for storage to contribute
     to reserves down while charging, the storage device must be capable of increasing the charge rate (which increases net load):
 ```math
 \begin{aligned}
@@ -2426,8 +2426,8 @@ Additionally, when reserves are modeled, the maximum DC and AC charge rate and c
 \end{aligned}
 ```
 
-Finally, the maximum DC and AC discharge rate and contributions to the frequency regulation and operating reserves must be 
-    less than the state of charge in the previous time period, $\Gamma_{y,z,t-1}$. Without any capacity reserve margin policies activated, 
+Finally, the maximum DC and AC discharge rate and contributions to the frequency regulation and operating reserves must be
+    less than the state of charge in the previous time period, $\Gamma_{y,z,t-1}$. Without any capacity reserve margin policies activated,
     the constraint is as follows:
 ```math
 \begin{aligned}
@@ -2436,7 +2436,7 @@ Finally, the maximum DC and AC discharge rate and contributions to the frequency
 \end{aligned}
 ```
 
-With the capacity reserve margin policies, the maximum DC and AC discharge rate accounts for both contributions to the capacity reserve 
+With the capacity reserve margin policies, the maximum DC and AC discharge rate accounts for both contributions to the capacity reserve
     margin and operating reserves as follows:
 ```math
 \begin{aligned}
@@ -2445,7 +2445,7 @@ With the capacity reserve margin policies, the maximum DC and AC discharge rate 
 \end{aligned}
 ```
 
-Lastly, if the co-located resource has a variable renewable energy component, the solar PV and wind resource can also contribute to frequency regulation reserves  
+Lastly, if the co-located resource has a variable renewable energy component, the solar PV and wind resource can also contribute to frequency regulation reserves
     and must be greater than zero:
 ```math
 \begin{aligned}
@@ -2454,7 +2454,7 @@ Lastly, if the co-located resource has a variable renewable energy component, th
 \end{aligned}
 ```
 """
-function vre_stor_operational_reserves!(EP::Model, inputs::Dict, setup::Dict)
+function vre_stor_operational_reserves!(EP, inputs::Dict, setup::Dict)
     println("VRE-STOR Operational Reserves Module")
 
     ### LOAD DATA & CREATE SETS ###
@@ -2698,7 +2698,7 @@ function vre_stor_operational_reserves!(EP::Model, inputs::Dict, setup::Dict)
         end
     end
 
-    ### CONSTRAINTS ### 
+    ### CONSTRAINTS ###
 
     # Frequency regulation and operating reserves for all co-located VRE-STOR resources
     if !isempty(VRE_STOR_REG_RSV)

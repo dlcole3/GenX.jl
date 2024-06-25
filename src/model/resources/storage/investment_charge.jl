@@ -38,7 +38,7 @@ In addition, this function adds investment and fixed O&M related costs related t
 \end{aligned}
 ```
 """
-function investment_charge!(EP::Model, inputs::Dict, setup::Dict)
+function investment_charge!(EP, inputs::Dict, setup::Dict)
     println("Charge Investment Module")
 
     gen = inputs["RESOURCES"]

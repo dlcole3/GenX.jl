@@ -41,7 +41,7 @@ In addition, this function adds investment and fixed O\&M related costs related 
 \end{aligned}
 ```
 """
-function investment_energy!(EP::Model, inputs::Dict, setup::Dict)
+function investment_energy!(EP, inputs::Dict, setup::Dict)
     println("Storage Investment Module")
 
     gen = inputs["RESOURCES"]

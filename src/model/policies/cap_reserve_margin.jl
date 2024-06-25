@@ -56,7 +56,7 @@ is specified by the GenX settings parameter ```CapacityReserveMargin```
 The expressions establishing the capacity reserve margin contributions of each technology
 class are included in their respective technology modules.
 """
-function cap_reserve_margin!(EP::Model, inputs::Dict, setup::Dict)
+function cap_reserve_margin!(EP, inputs::Dict, setup::Dict)
     # capacity reserve margin constraint
     T = inputs["T"]
     NCRM = inputs["NCapacityReserveMargin"]

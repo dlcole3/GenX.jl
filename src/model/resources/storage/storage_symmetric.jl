@@ -3,7 +3,7 @@
 
 Sets up variables and constraints specific to storage resources with symmetric charge and discharge capacities. See ```storage()``` in ```storage.jl``` for description of constraints.
 """
-function storage_symmetric!(EP::Model, inputs::Dict, setup::Dict)
+function storage_symmetric!(EP, inputs::Dict, setup::Dict)
     # Set up additional variables, constraints, and expressions associated with storage resources with symmetric charge & discharge capacity
     # (e.g. most electrochemical batteries that use same components for charge & discharge)
     # STOR = 1 corresponds to storage with distinct power and energy capacity decisions but symmetric charge/discharge power ratings
@@ -49,7 +49,7 @@ end
 
 Sets up variables and constraints specific to storage resources with symmetric charge and discharge capacities when reserves are modeled. See ```storage()``` in ```storage.jl``` for description of constraints.
 """
-function storage_symmetric_operational_reserves!(EP::Model, inputs::Dict, setup::Dict)
+function storage_symmetric_operational_reserves!(EP, inputs::Dict, setup::Dict)
     T = inputs["T"]
     CapacityReserveMargin = setup["CapacityReserveMargin"] > 0
 

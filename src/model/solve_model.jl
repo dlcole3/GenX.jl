@@ -10,7 +10,7 @@ This function fixes the iteger variables ones the model has been solved in order
 nothing (modifies an existing-solved model in the memory). `solve()` must be run again to solve and getdual veriables
 
 """
-function fix_integers(jump_model::Model)
+function fix_integers(jump_model)
     ################################################################################
     ## function fix_integers()
     ##
@@ -47,7 +47,7 @@ Description: Solves and extracts solution variables for later processing
 - `EP::Model`: the solved JuMP model
 - `solver_time::Float64`: time taken to solve the model
 """
-function solve_model(EP::Model, setup::Dict)
+function solve_model(EP, setup::Dict)
     ## Start solve timer
     solver_start_time = time()
     solver_time = time()

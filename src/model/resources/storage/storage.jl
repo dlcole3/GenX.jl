@@ -2,12 +2,12 @@
 	storage!(EP::Model, inputs::Dict, setup::Dict)
 A wide range of energy storage devices (all $o \in \mathcal{O}$) can be modeled in GenX, using one of two generic storage formulations: (1) storage technologies with symmetric charge and discharge capacity (all $o \in \mathcal{O}^{sym}$), such as Lithium-ion batteries and most other electrochemical storage devices that use the same components for both charge and discharge; and (2) storage technologies that employ distinct and potentially asymmetric charge and discharge capacities (all $o \in \mathcal{O}^{asym}$), such as most thermal storage technologies or hydrogen electrolysis/storage/fuel cell or combustion turbine systems.
 
-If a capacity reserve margin is modeled, variables for virtual charge, $\Pi^{CRM}_{o,z,t}$, and virtual discharge, $\Theta^{CRM}_{o,z,t}$, are created to represent 
-	contributions that a storage device makes to the capacity reserve margin without actually generating power. (This functionality can be turned off with the parameter StorageVirtualDischarge in the GenX settings file.) These represent power that the storage device could 
-	have discharged or consumed if called upon to do so, based on its available state of charge. Importantly, a dedicated set of variables (those of the form $\Pi^{CRM}_{o,z,t}, \Theta^{CRM}_{o,z,t}$) 
-	and constraints are created to ensure that any virtual contributions to the capacity reserve margin could be made as actual charge/discharge if necessary without 
-	affecting system operations in any other timesteps. If a capacity reserve margin is not modeled, all related variables are fixed at 0. The overall contribution 
-	of storage devices to the system's capacity reserve margin in timestep $t$ is equal to $\sum_{y \in \mathcal{O}} \epsilon_{y,z,p}^{CRM} \times \left(\Theta_{y,z,t} + \Theta^{CRM}_{o,z,t} - \Pi^{CRM}_{o,z,t} - \Pi_{y,z,t} \right)$, 
+If a capacity reserve margin is modeled, variables for virtual charge, $\Pi^{CRM}_{o,z,t}$, and virtual discharge, $\Theta^{CRM}_{o,z,t}$, are created to represent
+	contributions that a storage device makes to the capacity reserve margin without actually generating power. (This functionality can be turned off with the parameter StorageVirtualDischarge in the GenX settings file.) These represent power that the storage device could
+	have discharged or consumed if called upon to do so, based on its available state of charge. Importantly, a dedicated set of variables (those of the form $\Pi^{CRM}_{o,z,t}, \Theta^{CRM}_{o,z,t}$)
+	and constraints are created to ensure that any virtual contributions to the capacity reserve margin could be made as actual charge/discharge if necessary without
+	affecting system operations in any other timesteps. If a capacity reserve margin is not modeled, all related variables are fixed at 0. The overall contribution
+	of storage devices to the system's capacity reserve margin in timestep $t$ is equal to $\sum_{y \in \mathcal{O}} \epsilon_{y,z,p}^{CRM} \times \left(\Theta_{y,z,t} + \Theta^{CRM}_{o,z,t} - \Pi^{CRM}_{o,z,t} - \Pi_{y,z,t} \right)$,
 	and includes both actual and virtual charge and discharge.
 ```math
 \begin{aligned}
@@ -69,7 +69,7 @@ If a capacity reserve margin is modeled, then the following constraints track th
 The energy held in reserve, $\Gamma^{CRM}_{o,z,t}$, also acts as a lower bound on the overall state of charge $\Gamma_{o,z,t}$. This ensures that the storage device cannot use state of charge that would not have been available had it been called on to actually contribute its pledged virtual discharge at some earlier timestep. This relationship is described by the following equation:
 ```math
 \begin{aligned}
-	&  \Gamma_{o,z,t} \geq \Gamma^{CRM}_{o,z,t} 
+	&  \Gamma_{o,z,t} \geq \Gamma^{CRM}_{o,z,t}
 \end{aligned}
 ```
 
@@ -128,7 +128,7 @@ Finally, the constraints on maximum discharge rate are replaced by the following
 ```
 The above reserve related constraints are established by ```storage_all_operational_reserves!()``` in ```storage_all.jl```
 """
-function storage!(EP::Model, inputs::Dict, setup::Dict)
+function storage!(EP, inputs::Dict, setup::Dict)
     println("Storage Resources Module")
     gen = inputs["RESOURCES"]
     T = inputs["T"]

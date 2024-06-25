@@ -3,13 +3,13 @@
 ###### ###### ###### ###### ###### ######
 
 # Single element version
-function create_empty_expression!(EP::Model, exprname::Symbol)
+function create_empty_expression!(EP, exprname::Symbol)
     EP[exprname] = AffExpr(0.0)
     return nothing
 end
 
 # Vector version, to avoid needing to wrap the dimension in a tuple or array
-function create_empty_expression!(EP::Model, exprname::Symbol, dim1::Int64)
+function create_empty_expression!(EP, exprname::Symbol, dim1::Int64)
     temp = Array{AffExpr}(undef, dim1)
     fill_with_zeros!(temp)
     EP[exprname] = temp
@@ -17,15 +17,15 @@ function create_empty_expression!(EP::Model, exprname::Symbol, dim1::Int64)
 end
 
 @doc raw"""
-    create_empty_expression!(EP::Model, exprname::Symbol, dims::NTuple{N, Int64}) where N
+    create_empty_expression!(EP, exprname::Symbol, dims::NTuple{N, Int64}) where N
 
 Create an dense array filled with zeros which can be altered later.
 Other approaches to creating zero-filled arrays will often return an array of floats, not expressions.
 This can lead to errors later if a method can only operate on expressions.
-    
+
 We don't currently have a method to do this with non-contiguous indexing.
 """
-function create_empty_expression!(EP::Model,
+function create_empty_expression!(EP,
         exprname::Symbol,
         dims::NTuple{N, Int64}) where {N}
     temp = Array{AffExpr}(undef, dims)
@@ -35,7 +35,7 @@ function create_empty_expression!(EP::Model,
 end
 
 # Version with the dimensions wrapped in an array. This requires slightly more memory than using tuples
-function create_empty_expression!(EP::Model, exprname::Symbol, dims::Vector{Int64})
+function create_empty_expression!(EP, exprname::Symbol, dims::Vector{Int64})
     temp = Array{AffExpr}(undef, dims...)
     fill_with_zeros!(temp)
     EP[exprname] = temp
@@ -121,7 +121,7 @@ end
 @doc raw"""
     add_similar_to_expression!(expr1::AbstractArray{GenericAffExpr{C,T}, dim1}, expr2::AbstractArray{V, dim2}) where {C,T,V,dim1,dim2}
 
-Add an array of some type `V` to an array of expressions, in-place. 
+Add an array of some type `V` to an array of expressions, in-place.
 This will work on JuMP DenseContainers which do not have linear indexing from 1:length(arr).
 However, the accessed parts of both arrays must have the same dimensions.
 """
@@ -152,7 +152,7 @@ end
 @doc raw"""
     add_term_to_expression!(expr1::AbstractArray{GenericAffExpr{C,T}, dims}, expr2::V) where {C,T,V,dims}
 
-Add an entry of type `V` to an array of expressions, in-place. 
+Add an entry of type `V` to an array of expressions, in-place.
 This will work on JuMP DenseContainers which do not have linear indexing from 1:length(arr).
 """
 function add_term_to_expression!(expr1::AbstractArray{GenericAffExpr{C, T}, dims},
@@ -170,7 +170,7 @@ end
 @doc raw"""
     check_sizes_match(expr1::AbstractArray{C, dim1}, expr2::AbstractArray{T, dim2}) where {C,T,dim1, dim2}
 
-Check that two arrays have the same dimensions. 
+Check that two arrays have the same dimensions.
 If not, return an error message which includes the dimensions of both arrays.
 """
 function check_sizes_match(expr1::AbstractArray{C, dim1},

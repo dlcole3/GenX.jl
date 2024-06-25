@@ -3,9 +3,9 @@
 
 This function defines the constraints for operation of retrofit technologies, including
 		but not limited to carbon capture and thermal energy storage.
-	
+
 For retrofittable source technologies $y$ and retrofit technologies $r$ in the same region $z$ and retrofit cluster $id$,
-(i.e. $y \in RS(id)$ and $r \in RO(id)$), the total retrofit capacity $\Omega_{r}$ that may be installed 
+(i.e. $y \in RS(id)$ and $r \in RO(id)$), the total retrofit capacity $\Omega_{r}$ that may be installed
 is constrained by the available retrofittable capacity $P_{y}$ as well as the efficiency ${ef}_{r}$ of the retrofit technology.
 
 ```math
@@ -16,7 +16,7 @@ is constrained by the available retrofittable capacity $P_{y}$ as well as the ef
 where ${RETROFIT}$ represents the set of all retrofit IDs (clusters) in the model.
 
 """
-function retrofit(EP::Model, inputs::Dict)
+function retrofit(EP, inputs::Dict)
     println("Retrofit Resources Module")
 
     gen = inputs["RESOURCES"]

@@ -23,7 +23,7 @@ If ```StorageLosses=0```, this term is removed from the constraint.
 In practice, most existing renewable portfolio standard policies do not account for storage losses when determining energy share requirements.
 However, with 100% RPS or CES policies enacted in several jurisdictions, policy makers may wish to include storage losses in the minimum energy share, as otherwise there will be a difference between total generation and total demand that will permit continued use of non-qualifying resources (e.g. emitting generators).
 """
-function energy_share_requirement!(EP::Model, inputs::Dict, setup::Dict)
+function energy_share_requirement!(EP, inputs::Dict, setup::Dict)
     println("Energy Share Requirement Policies Module")
 
     # if input files are present, add energy share requirement slack variables

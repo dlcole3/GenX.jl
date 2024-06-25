@@ -32,7 +32,7 @@ In addition, this function adds investment and fixed O\&M related costs related 
 \end{aligned}
 ```
 """
-function investment_discharge!(EP::Model, inputs::Dict, setup::Dict)
+function investment_discharge!(EP, inputs::Dict, setup::Dict)
     println("Investment Discharge Module")
     MultiStage = setup["MultiStage"]
 
@@ -57,7 +57,7 @@ function investment_discharge!(EP::Model, inputs::Dict, setup::Dict)
         @variable(EP, vEXISTINGCAP[y = 1:G]>=0)
     end
 
-    # Being retrofitted capacity of resource y 
+    # Being retrofitted capacity of resource y
     @variable(EP, vRETROFITCAP[y in RETROFIT_CAP]>=0)
 
     ### Expressions ###

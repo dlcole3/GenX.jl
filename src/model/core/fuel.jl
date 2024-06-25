@@ -1,23 +1,23 @@
 
 @doc raw"""
-    fuel!(EP::Model, inputs::Dict, setup::Dict)
+    fuel!(EP, inputs::Dict, setup::Dict)
 
-This function creates expressions to account for total fuel consumption (e.g., coal, 
+This function creates expressions to account for total fuel consumption (e.g., coal,
 natural gas, hydrogen, etc). It also has the capability to model heat rates that are
 a function of load via a piecewise-linear approximation.
 
 ***** Expressions ******
-Users have two options to model the fuel consumption as a function of power generation: 
-(1). Use a constant heat rate, regardless of the minimum load or maximum load; and 
-(2). Use the PiecewiseFuelUsage-related parameters to model the fuel consumption via a 
-piecewise-linear approximation of the heat rate curves. By using this option, users can represent 
+Users have two options to model the fuel consumption as a function of power generation:
+(1). Use a constant heat rate, regardless of the minimum load or maximum load; and
+(2). Use the PiecewiseFuelUsage-related parameters to model the fuel consumption via a
+piecewise-linear approximation of the heat rate curves. By using this option, users can represent
 the fact that most generators have a decreasing heat rate as a function of load.
 
-(1). Constant heat rate. 
-The fuel consumption for power generation $vFuel_{y,t}$ is determined by power generation 
-($vP_{y,t}$) mutiplied by the corresponding heat rate ($Heat\_Rate_y$). 
-The fuel costs for power generation and start fuel for a plant $y$ at time $t$, 
-denoted by $eCFuelOut_{y,t}$ and $eFuelStart$, are determined by fuel consumption ($vFuel_{y,t}$ 
+(1). Constant heat rate.
+The fuel consumption for power generation $vFuel_{y,t}$ is determined by power generation
+($vP_{y,t}$) mutiplied by the corresponding heat rate ($Heat\_Rate_y$).
+The fuel costs for power generation and start fuel for a plant $y$ at time $t$,
+denoted by $eCFuelOut_{y,t}$ and $eFuelStart$, are determined by fuel consumption ($vFuel_{y,t}$
 and $eStartFuel$) multiplied by the fuel costs (\$/MMBTU)
 (2). Piecewise-linear approximation
 With this formulation, the heat rate of generators becomes a function of load.
@@ -33,36 +33,36 @@ vFuel_{y,t} >= vP_{y,t} * h_{y,x} + U_{g,t}* f_{y,x}
 Where $h_{y,x}$ represents the heat rate slope for generator $y$ in segment $x$ [MMBTU/MWh],
  $f_{y,x}$ represents the heat rate intercept (MMBTU) for a generator $y$ in segment $x$ [MMBTU],
 and $U_{y,t}$ represents the commitment status of a generator $y$ at time $t$. These parameters
-are optional inputs to the resource .csv files. 
-When Unit commitment is on, if a user provides slope and intercept, the standard heat rate 
-(i.e., Heat_Rate_MMBTU_per_MWh) will not be used. When unit commitment is off, the model will 
+are optional inputs to the resource .csv files.
+When Unit commitment is on, if a user provides slope and intercept, the standard heat rate
+(i.e., Heat_Rate_MMBTU_per_MWh) will not be used. When unit commitment is off, the model will
 always use the standard heat rate.
-The user should determine the slope and intercept parameters based on the Cap_Size of the plant. 
+The user should determine the slope and intercept parameters based on the Cap_Size of the plant.
 For example, when a plant is operating at the full load (i.e., power output equal to the Cap_Size),
-the fuel usage determined by the effective segment divided by Cap_Size should be equal to the 
+the fuel usage determined by the effective segment divided by Cap_Size should be equal to the
 heat rate at full-load.
 
 Since fuel consumption and fuel costs are postive, the optimization will force the fuel usage
 to be equal to the highest fuel usage segment for any given value of vP.
-When the power output is zero, the commitment variable $U_{g,t}$ will bring the intercept 
+When the power output is zero, the commitment variable $U_{g,t}$ will bring the intercept
 to be zero such that the fuel consumption is zero when thermal units are offline.
 
 In order to run piecewise fuel consumption module,
-the unit commitment must be turned on (UC = 1 or 2), and users should provide PWFU_Slope_* and 
-PWFU_Intercept_* for at least one segment. 
+the unit commitment must be turned on (UC = 1 or 2), and users should provide PWFU_Slope_* and
+PWFU_Intercept_* for at least one segment.
 
-To enable resources to use multiple fuels during both startup and normal operational processes, three additional variables were added: 
-fuel $i$ consumption by plant $y$ at time $t$ ($vMulFuel_{y,i,t}$); startup fuel consumption for single-fuel plants ($vStartFuel_{y,t}$); and startup fuel consumption for multi-fuel plants ($vMulStartFuel_{y,i,t}$). By making startup fuel consumption variables, the model can choose the startup fuel to meet the constraints.    
-    
+To enable resources to use multiple fuels during both startup and normal operational processes, three additional variables were added:
+fuel $i$ consumption by plant $y$ at time $t$ ($vMulFuel_{y,i,t}$); startup fuel consumption for single-fuel plants ($vStartFuel_{y,t}$); and startup fuel consumption for multi-fuel plants ($vMulStartFuel_{y,i,t}$). By making startup fuel consumption variables, the model can choose the startup fuel to meet the constraints.
+
 For plants using multiple fuels:
-    
+
 During startup, heat input from multiple startup fuels are equal to startup fuel requirements in plant $y$ at time $t$: $StartFuelMMBTUperMW$ $\times$ $Capsize$.
 ```math
 \begin{aligned}
 \sum_{i \in \mathcal{I} } vMulStartFuels_{y, i, t}= CapSize_{y} \times StartFuelMMBTUperMW_{y} \times vSTART_{y,t}
 \end{aligned}
 ```
-During normal operation, the sum of fuel consumptions from multiple fuels dividing by the correspnding heat rates, respectively, is equal to $vPower$ in plant $y$ at time $t$. 
+During normal operation, the sum of fuel consumptions from multiple fuels dividing by the correspnding heat rates, respectively, is equal to $vPower$ in plant $y$ at time $t$.
 ```math
 \begin{aligned}
 \sum_{i \in \mathcal{I} } \frac{vMulFuels_{y, i, t}} {HeatRate_{i,y} } = vPower_{y,t}
@@ -72,13 +72,13 @@ There are also constraints on how much heat input each fuel can provide, which a
 ```math
 \begin{aligned}
 vMulFuels_{y, i, t} >= vPower_{y,t} \times MinCofire_{i}
-\end{aligned}   
+\end{aligned}
 \begin{aligned}
 vMulFuels_{y, i, t} <= vPower_{y,t} \times MaxCofire_{i}
 \end{aligned}
 ```
 """
-function fuel!(EP::Model, inputs::Dict, setup::Dict)
+function fuel!(EP, inputs::Dict, setup::Dict)
     println("Fuel Module")
     gen = inputs["RESOURCES"]
 
@@ -125,7 +125,7 @@ function fuel!(EP::Model, inputs::Dict, setup::Dict)
     end
 
     ### Expressions ####
-    # Fuel consumed on start-up (MMBTU or kMMBTU (scaled)) 
+    # Fuel consumed on start-up (MMBTU or kMMBTU (scaled))
     # if unit commitment is modelled
     @expression(EP, eStartFuel[y in 1:G, t = 1:T],
         if y in THERM_COMMIT
@@ -135,7 +135,7 @@ function fuel!(EP::Model, inputs::Dict, setup::Dict)
             0
         end)
 
-    # time-series fuel consumption by plant 
+    # time-series fuel consumption by plant
     @expression(EP, ePlantFuel_generation[y in 1:G, t = 1:T],
         if y in SINGLE_FUEL   # for single fuel plants
             EP[:vFuel][y, t]
@@ -225,10 +225,10 @@ function fuel!(EP::Model, inputs::Dict, setup::Dict)
     # for multi-fuel resources
     if !isempty(MULTI_FUELS)
         @expression(EP, eFuelConsumption_multi[f in 1:NUM_FUEL, t in 1:T],
-            sum((EP[:vMulFuels][y, i, t] + EP[:vMulStartFuels][y, i, t]) #i: fuel id 
+            sum((EP[:vMulFuels][y, i, t] + EP[:vMulStartFuels][y, i, t]) #i: fuel id
             for i in 1:max_fuels,
             y in intersect(
-                resource_id.(gen[fuel_cols.(gen, tag = i) .== string(fuels[f])]),
+                resource_id.(gen[fuel_cols.(gen, tag = i) == string(fuels[f])]),
                 MULTI_FUELS)))
     end
 
@@ -284,7 +284,7 @@ function fuel!(EP::Model, inputs::Dict, setup::Dict)
                          EP[:vCOMMIT][y, t] * segment_intercept(y, seg)))
         end
 
-        # constraint for fuel consumption at a constant heat rate 
+        # constraint for fuel consumption at a constant heat rate
         @constraint(EP,
             FuelCalculationCommit_single[
                 y in intersect(setdiff(THERM_COMMIT,
@@ -300,24 +300,24 @@ function fuel!(EP::Model, inputs::Dict, setup::Dict)
                         MULTI_FUELS),
                     t = 1:T],
                 sum(EP[:vMulFuels][y, i, t] / heat_rates[i][y] for i in 1:max_fuels) -
-                EP[:vP][y, t].==0)
+                EP[:vP][y, t]==0)
         end
     end
 
     # constraints on start up fuel use
     @constraint(EP, cStartFuel_single[y in intersect(THERM_COMMIT, SINGLE_FUEL), t = 1:T],
         EP[:vStartFuel][y, t] -
-        (cap_size(gen[y]) * EP[:vSTART][y, t] * start_fuel_mmbtu_per_mw(gen[y])).==0)
+        (cap_size(gen[y]) * EP[:vSTART][y, t] * start_fuel_mmbtu_per_mw(gen[y]))==0)
     if !isempty(MULTI_FUELS)
         @constraint(EP,
             cStartFuel_multi[y in intersect(THERM_COMMIT, MULTI_FUELS), t = 1:T],
             sum(EP[:vMulStartFuels][y, i, t] for i in 1:max_fuels) -
-            (cap_size(gen[y]) * EP[:vSTART][y, t] * start_fuel_mmbtu_per_mw(gen[y])).==0)
+            (cap_size(gen[y]) * EP[:vSTART][y, t] * start_fuel_mmbtu_per_mw(gen[y]))==0)
     end
 
     # constraints on co-fire ratio of different fuels used by one generator
     # for example,
-    # fuel2/heat rate >= min_cofire_level * total power 
+    # fuel2/heat rate >= min_cofire_level * total power
     # fuel2/heat rate <= max_cofire_level * total power without retrofit
     if !isempty(MULTI_FUELS)
         for i in 1:max_fuels

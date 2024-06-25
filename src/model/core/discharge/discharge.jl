@@ -10,7 +10,7 @@ This module additionally defines contributions to the objective function from va
 \end{aligned}
 ```
 """
-function discharge!(EP::Model, inputs::Dict, setup::Dict)
+function discharge!(EP, inputs::Dict, setup::Dict)
     println("Discharge Module")
 
     gen = inputs["RESOURCES"]
