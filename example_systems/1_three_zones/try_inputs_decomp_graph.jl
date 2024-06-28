@@ -5,7 +5,7 @@ case = dirname(@__FILE__)
 
 Pkg.activate(dirname(dirname(case)))
 
-using GenX, HiGHS, Plasmo
+using GenX, HiGHS, Plasmo, JuMP
 
 genx_settings = GenX.get_settings_path(case, "genx_settings.yml") # Settings YAML file path
 writeoutput_settings = GenX.get_settings_path(case, "output_settings.yml") # Write-output settings YAML file path
@@ -38,30 +38,53 @@ num_subperiods = length(myinputs_decomp)
 
 g = OptiGraph()
 
+@optinode(g, master_node)
 @optinode(g, nodes[1:num_subperiods])
 
 for i in 1:num_subperiods
     myinputs_decomp[i]["Node"] = nodes[i]
 end
 
+myinputs["Node"] = master_node
+master_model = GenX.generate_investment_model(mysetup,myinputs,OPTIMIZER);
+
 for w in keys(myinputs_decomp)
     decomp_models[w] = generate_model(mysetup, myinputs_decomp[w], OPTIMIZER);
 end
 
+link_vars = all_variables(master_node)
+var_strings = name.(link_vars)
+cleaned_strings = [replace(str, r"master_node\[:(.*)\]" => s"\1") for str in var_strings]
+var_symbols = Symbol.(cleaned_strings)
 
+for w in keys(myinputs_decomp)
+    @linkconstraint(g, master_node[:vZERO] == decomp_models[w][:vZERO])
+    for i in 1:10
+        @linkconstraint(g, master_node[:vCAP][i] == decomp_models[w][:vCAP][i])
+    end
+    for i in 1:2
+        @linkconstraint(g, master_node[:vNEW_TRANS_CAP][i] == decomp_models[w][:vNEW_TRANS_CAP][i])
+    end
+    for i in 8:10
+        @linkconstraint(g, master_node[:vCAPENERGY][i] == decomp_models[w][:vCAPENERGY][i])
+    end
+end
 
 #=
-The master problem could be formulated on a node by doing something like
-@optinode(g, master_node)
-and then doing something similar using the generate_model function as above
+set_optimizer_attribute(OPTIMIZER, "output_flag", false)
+set_optimizer(master_node, OPTIMIZER)
+for i in 1:length(nodes)
+    set_optimizer(nodes[i], OPTIMIZER)
+end
 
-link constraints are added via the @linkconstraint macro, like the following
+using PlasmoDecompositions
 
-@linkconstraint(g, g[:master_node][:var_ref] == g[:nodes][1][:var_ref])
-
-In this case, the link constraints are owned by the graph, g, not by the nodes.
-Other than that, it behaves like the @constraint macro*
-
-* disclaimer: The link constraints don't support nonlinearities right now as far
-as I know, but that shouldn't matter for this problem
+ddpopt = DDPOptimizer(g, master_node,
+    regularize = true,
+    multicut = true,
+    parallelize_benders = true,
+    strengthened = true,
+    tol = 1e-4
+);
+optimize!(ddpopt)
 =#
