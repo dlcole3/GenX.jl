@@ -88,11 +88,6 @@ function generate_model(setup::Dict, inputs::Dict, OPTIMIZER::MOI.OptimizerWithA
 
     operation_model!(EP,setup,inputs)
 
-    # Model constraints, variables, expressions related to the co-located VRE-storage resources
-    if !isempty(inputs["VRE_STOR"])
-        vre_stor!(EP, inputs, setup)
-    end
-
     if setup["ModelingToGenerateAlternatives"] == 1
         mga!(EP, inputs, setup)
     end
@@ -232,6 +227,10 @@ function operation_model!(EP::Model,setup::Dict, inputs::Dict)
         thermal!(EP, inputs, setup)
     end
 
+    # Model constraints, variables, expressions related to the co-located VRE-storage resources
+    if setup["Benders"]==0 && !isempty(inputs["VRE_STOR"])
+        vre_stor!(EP, inputs, setup)
+    end
 
     # Policies
 
