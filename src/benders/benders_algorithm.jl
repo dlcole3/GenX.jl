@@ -144,7 +144,7 @@ function benders(benders_inputs::Dict{Any,Any},setup::Dict)
 	return (planning_problem=planning_problem,planning_sol = planning_sol_best,LB_hist = LB_hist,UB_hist = UB_hist,cpu_time = cpu_time,feasibility_hist = feasibility_hist)
 end
 
-function update_planning_problem_multi_cuts!(EP::Model,subop_sol::Dict,planning_sol::NamedTuple,planning_variables_sub::Dict)
+function update_planning_problem_multi_cuts!(EP::GenXModel,subop_sol::Dict,planning_sol::NamedTuple,planning_variables_sub::Dict)
     
 	W = keys(subop_sol);
 	

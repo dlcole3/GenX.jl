@@ -316,7 +316,7 @@ function run_ddp(outpath::AbstractString, models_d::Dict, setup::Dict, inputs_d:
 end
 
 @doc raw"""
-	fix_initial_investments(EP_prev::Model, EP_cur::Model, start_cap_d::Dict)
+	fix_initial_investments(EP_prev::GenXModel, EP_cur::GenXModel, start_cap_d::Dict)
 
 This function sets the right hand side values of the existing capacity linking constraints in the current stage $p$ to the realized values of the total available end capacity linking variable expressions from the previous stage $p-1$ as part of the forward pass.
 
@@ -328,8 +328,8 @@ inputs:
 
 returns: JuMP model with updated linking constraints.
 """
-function fix_initial_investments(EP_prev::Model,
-        EP_cur::Model,
+function fix_initial_investments(EP_prev::GenXModel,
+        EP_cur::GenXModel,
         start_cap_d::Dict,
         inputs_d::Dict)
     ALL_CAP = union(inputs_d["RET_CAP"], inputs_d["NEW_CAP"]) # Set of all resources subject to inter-stage capacity tracking
@@ -352,7 +352,7 @@ function fix_initial_investments(EP_prev::Model,
 end
 
 @doc raw"""
-	fix_capacity_tracking(EP_prev::Model, EP_cur::Model, cap_track_d::Dict, cur_stage::Int)
+	fix_capacity_tracking(EP_prev::GenXModel, EP_cur::GenXModel, cap_track_d::Dict, cur_stage::Int)
 
 This function sets the right hand side values of the new and retired capacity tracking linking constraints in the current stage $p$ to the realized values of the new and retired capacity tracking linking variables from the previous stage $p-1$ as part of the forward pass.
 where tracking linking variables are defined variables for tracking, linking and passing realized expansion and retirement of capacities of each stage to the next stage.
@@ -367,8 +367,8 @@ inputs:
 
 returns: JuMP model with updated linking constraints.
 """
-function fix_capacity_tracking(EP_prev::Model,
-        EP_cur::Model,
+function fix_capacity_tracking(EP_prev::GenXModel,
+        EP_cur::GenXModel,
         cap_track_d::Dict,
         cur_stage::Int)
 
@@ -399,7 +399,7 @@ function fix_capacity_tracking(EP_prev::Model,
 end
 
 @doc raw"""
-	add_cut(EP_cur::Model, EP_next::Model, start_cap_d::Dict, cap_track_d::Dict)
+	add_cut(EP_cur::GenXModel, EP_next::GenXModel, start_cap_d::Dict, cap_track_d::Dict)
 
 inputs:
 
@@ -410,7 +410,7 @@ inputs:
 
 returns: JuMP expression representing a sum of Benders cuts for linking capacity investment variables to be added to the cost-to-go function.
 """
-function add_cut(EP_cur::Model, EP_next::Model, start_cap_d::Dict, cap_track_d::Dict)
+function add_cut(EP_cur::GenXModel, EP_next::GenXModel, start_cap_d::Dict, cap_track_d::Dict)
     next_obj_value = objective_value(EP_next) # Get the objective function value for the next investment planning stage
 
     eRHS = @expression(EP_cur, 0) # Initialize RHS of cut to 0
@@ -464,7 +464,7 @@ function add_cut(EP_cur::Model, EP_next::Model, start_cap_d::Dict, cap_track_d::
 end
 
 @doc raw"""
-	generate_cut_component_inv(EP_cur::Model, EP_next::Model, expr_name::Symbol, constr_name::Symbol)
+	generate_cut_component_inv(EP_cur::GenXModel, EP_next::GenXModel, expr_name::Symbol, constr_name::Symbol)
 
 This function generates Bender's cut expressions for total new or retired capacity tracking linking variables in the form:
 ```math
@@ -483,8 +483,8 @@ inputs:
 
 returns: JuMP expression representing a sum of Benders cuts for linking capacity investment variables to be added to the cost-to-go function.
 """
-function generate_cut_component_track(EP_cur::Model,
-        EP_next::Model,
+function generate_cut_component_track(EP_cur::GenXModel,
+        EP_next::GenXModel,
         var_name::Symbol,
         constr_name::Symbol)
     next_dual_value = Float64[]
@@ -507,7 +507,7 @@ function generate_cut_component_track(EP_cur::Model,
 end
 
 @doc raw"""
-	generate_cut_component_inv(EP_cur::Model, EP_next::Model, expr_name::Symbol, constr_name::Symbol)
+	generate_cut_component_inv(EP_cur::GenXModel, EP_next::GenXModel, expr_name::Symbol, constr_name::Symbol)
 
 This function generates Bender's cut expressions for linking capacity investment variable expression in the form:
 ```math
@@ -526,8 +526,8 @@ inputs:
 
 returns: JuMP expression representing a sum of Benders cuts for linking capacity investment variables to be added to the cost-to-go function.
 """
-function generate_cut_component_inv(EP_cur::Model,
-        EP_next::Model,
+function generate_cut_component_inv(EP_cur::GenXModel,
+        EP_next::GenXModel,
         expr_name::Symbol,
         constr_name::Symbol)
     next_dual_value = Float64[]
@@ -547,7 +547,7 @@ function generate_cut_component_inv(EP_cur::Model,
 end
 
 @doc raw"""
-	initialize_cost_to_go(settings_d::Dict, EP::Model)
+	initialize_cost_to_go(settings_d::Dict, EP::GenXModel)
 
 This function scales the model objective function so that costs are consistent with multi-stage modeling and introduces a cost-to-go function variable to the objective function.
 
@@ -582,7 +582,7 @@ inputs:
 
 returns: JuMP model with updated objective function.
 """
-function initialize_cost_to_go(settings_d::Dict, EP::Model, inputs::Dict)
+function initialize_cost_to_go(settings_d::Dict, EP::GenXModel, inputs::Dict)
     cur_stage = settings_d["CurStage"] # Current DDP Investment Planning Stage
     cum_years = 0
     for stage_count in 1:(cur_stage - 1)

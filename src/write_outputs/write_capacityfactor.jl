@@ -1,10 +1,10 @@
 @doc raw"""
-	write_capacityfactor(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
+	write_capacityfactor(path::AbstractString, inputs::Dict, setup::Dict, EP::GenXModel)
 
 Function for writing the capacity factor of different resources. For co-located VRE-storage resources, this
     value is calculated if the site has either or both a solar PV or wind resource.
 """
-function write_capacityfactor(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
+function write_capacityfactor(path::AbstractString, inputs::Dict, setup::Dict, EP::GenXModel)
     gen = inputs["RESOURCES"]
     G = inputs["G"]     # Number of resources (generators, storage, DR, and DERs)
     T = inputs["T"]     # Number of time steps (hours)

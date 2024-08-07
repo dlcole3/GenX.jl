@@ -1,5 +1,5 @@
 @doc raw"""
-	retrofit(EP::Model, inputs::Dict)
+	retrofit(EP::GenXModel, inputs::Dict)
 
 This function defines the constraints for operation of retrofit technologies, including
 		but not limited to carbon capture and thermal energy storage.

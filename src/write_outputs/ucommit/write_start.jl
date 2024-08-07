@@ -1,4 +1,4 @@
-function write_start(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
+function write_start(path::AbstractString, inputs::Dict, setup::Dict, EP::GenXModel)
     COMMIT = inputs["COMMIT"]
     # Startup state for each resource in each time step
     resources = inputs["RESOURCE_NAMES"][COMMIT]

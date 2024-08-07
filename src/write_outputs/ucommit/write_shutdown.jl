@@ -1,4 +1,4 @@
-function write_shutdown(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
+function write_shutdown(path::AbstractString, inputs::Dict, setup::Dict, EP::GenXModel)
     # Operational decision variable states
     COMMIT = inputs["COMMIT"]
     zones = inputs["R_ZONES"][COMMIT]

@@ -1,10 +1,10 @@
 @doc raw"""
-	fix_integers(jump_model::Model)
+	fix_integers(jump_model::GenXModel)
 
 This function fixes the iteger variables ones the model has been solved in order to calculate approximations of dual variables.
 
 # Arguments
-- `jump_model::Model`: a model object containing that has been previously solved.
+- `jump_model::GenXModel`: a model object containing that has been previously solved.
 
 # Returns
 nothing (modifies an existing-solved model in the memory). `solve()` must be run again to solve and getdual veriables
@@ -36,15 +36,15 @@ function fix_integers(jump_model)
 end
 
 @doc raw"""
-	solve_model(EP::Model, setup::Dict)
+	solve_model(EP::GenXModel, setup::Dict)
 Description: Solves and extracts solution variables for later processing
 
 # Arguments
-- `EP::Model`: a JuMP model representing the energy optimization problem
+- `EP::GenXModel`: a JuMP model representing the energy optimization problem
 - `setup::Dict`: a Dict containing GenX setup flags
 
 # Returns
-- `EP::Model`: the solved JuMP model
+- `EP::GenXModel`: the solved JuMP model
 - `solver_time::Float64`: time taken to solve the model
 """
 function solve_model(EP, setup::Dict)

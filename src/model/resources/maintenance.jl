@@ -67,7 +67,7 @@ function controlling_maintenance_start_hours(p::Int,
 end
 
 @doc raw"""
-    maintenance_formulation!(EP::Model,
+    maintenance_formulation!(EP::GenXModel,
         inputs::Dict,
         resource_component::AbstractString,
         r_id::Int,

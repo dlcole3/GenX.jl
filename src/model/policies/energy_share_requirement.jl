@@ -1,5 +1,5 @@
 @doc raw"""
-	energy_share_requirement!(EP::Model, inputs::Dict, setup::Dict)
+	energy_share_requirement!(EP::GenXModel, inputs::Dict, setup::Dict)
 This function establishes constraints that can be flexibily applied to define alternative forms of policies that require generation of a minimum quantity of megawatt-hours from a set of qualifying resources, such as renewable portfolio standard (RPS) or clean electricity standard (CES) policies prevalent in different jurisdictions.
 These policies usually require that the annual MWh generation from a subset of qualifying generators has to be higher than a pre-specified percentage of demand from qualifying zones.
 The implementation allows for user to define one or multiple RPS/CES style minimum energy share constraints,
@@ -45,7 +45,7 @@ function energy_share_requirement!(EP, inputs::Dict, setup::Dict)
     @constraint(EP, cESRShare[ESR = 1:inputs["nESR"]], EP[:eESR][ESR]>=0)
 end
 
-function energy_share_requirement_subperiod!(EP::Model, inputs::Dict, setup::Dict)
+function energy_share_requirement_subperiod!(EP::GenXModel, inputs::Dict, setup::Dict)
     println("Energy Share Requirement Policies Operation Module")
     w = inputs["SubPeriod"];
     # if input files are present, add energy share requirement slack variables
@@ -68,7 +68,7 @@ function energy_share_requirement_subperiod!(EP::Model, inputs::Dict, setup::Dic
     @constraint(EP, cESRShare[ESR = 1:inputs["nESR"]], EP[:eESR][ESR]>=vESRbudget[w,ESR])
 end
 
-function energy_share_requirement_planning!(EP::Model, inputs::Dict, setup::Dict)
+function energy_share_requirement_planning!(EP::GenXModel, inputs::Dict, setup::Dict)
     println("Energy Share Requirement Policies Planning Module")
     
     @variable(EP,vESRbudget[w=1:inputs["REP_PERIOD"],ESR=1:inputs["nESR"]])

@@ -1,4 +1,4 @@
-function write_commit(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
+function write_commit(path::AbstractString, inputs::Dict, setup::Dict, EP::GenXModel)
     COMMIT = inputs["COMMIT"]
     T = inputs["T"]
 

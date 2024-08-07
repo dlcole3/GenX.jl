@@ -1,5 +1,5 @@
 @doc raw"""
-	co2_cap!(EP::Model, inputs::Dict, setup::Dict)
+	co2_cap!(EP::GenXModel, inputs::Dict, setup::Dict)
 
 This policy constraints mimics the CO$_2$ emissions cap and permit trading systems,
 allowing for emissions trading across each zone for which the cap applies.
@@ -124,7 +124,7 @@ function co2_cap!(EP, inputs::Dict, setup::Dict)
 end
 
 
-function co2_cap_subperiod!(EP::Model, inputs::Dict, setup::Dict)
+function co2_cap_subperiod!(EP::GenXModel, inputs::Dict, setup::Dict)
     println("CO2 Policies Operation Module")
 
     SEG = inputs["SEG"]  # Number of lines
@@ -179,7 +179,7 @@ function co2_cap_subperiod!(EP::Model, inputs::Dict, setup::Dict)
     end
 end
 
-function co2_cap_planning!(EP::Model, inputs::Dict, setup::Dict)
+function co2_cap_planning!(EP::GenXModel, inputs::Dict, setup::Dict)
     println("CO2 Policies Planning Module")
 
     @variable(EP,vCO2budget[w=1:inputs["REP_PERIOD"],cap=1:inputs["NCO2Cap"]])

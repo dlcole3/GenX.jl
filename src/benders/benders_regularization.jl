@@ -1,5 +1,5 @@
 
-function solve_int_level_set_problem(EP::Model,planning_variables::Vector{String},planning_sol::NamedTuple,LB,UB,γ)
+function solve_int_level_set_problem(EP::GenXModel,planning_variables::Vector{String},planning_sol::NamedTuple,LB,UB,γ)
 	
 	@constraint(EP,cLevel_set,EP[:eObj] + sum(EP[:vTHETA])<=LB+γ*(UB-LB))
 

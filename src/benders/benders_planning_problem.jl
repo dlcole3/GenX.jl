@@ -61,7 +61,7 @@ end
 
 
 
-function solve_planning_problem(EP::Model,planning_variables::Vector{String})
+function solve_planning_problem(EP::GenXModel,planning_variables::Vector{String})
 	
 	if any(is_integer.(all_variables(EP)))
 		println("The planning model is a MILP")

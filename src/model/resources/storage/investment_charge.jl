@@ -1,5 +1,5 @@
 @doc raw"""
-	investment_charge!(EP::Model, inputs::Dict)
+	investment_charge!(EP::GenXModel, inputs::Dict)
 
 This function defines the expressions and constraints keeping track of total available storage charge capacity across all resources as well as constraints on capacity retirements. The function also adds investment and fixed O\&M related costs related to charge capacity to the objective function.
 

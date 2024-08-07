@@ -1,4 +1,4 @@
-function lds_slack!(EP::Model, inputs::Dict,setup::Dict)
+function lds_slack!(EP::GenXModel, inputs::Dict,setup::Dict)
 
     println("Including slacks for all LDES constraints")
 

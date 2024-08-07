@@ -1,5 +1,5 @@
 @doc raw"""
-	function dcopf_transmission!(EP::Model, inputs::Dict, setup::Dict)
+	function dcopf_transmission!(EP::GenXModel, inputs::Dict, setup::Dict)
 The addtional constraints imposed upon the line flows in the case of DC-OPF are as follows:
 For the definition of the line flows, in terms of the voltage phase angles:
 ```math

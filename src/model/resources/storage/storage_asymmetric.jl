@@ -1,5 +1,5 @@
 @doc raw"""
-	storage_asymmetric!(EP::Model, inputs::Dict, setup::Dict)
+	storage_asymmetric!(EP::GenXModel, inputs::Dict, setup::Dict)
 
 Sets up variables and constraints specific to storage resources with asymmetric charge and discharge capacities. See ```storage()``` in ```storage.jl``` for description of constraints.
 """
@@ -38,7 +38,7 @@ function storage_asymmetric!(EP, inputs::Dict, setup::Dict)
 end
 
 @doc raw"""
-	storage_asymmetric_operational_reserves!(EP::Model, inputs::Dict)
+	storage_asymmetric_operational_reserves!(EP::GenXModel, inputs::Dict)
 
 Sets up variables and constraints specific to storage resources with asymmetric charge and discharge capacities when reserves are modeled. See ```storage()``` in ```storage.jl``` for description of constraints.
 """

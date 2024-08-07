@@ -155,7 +155,7 @@ function solve_local_subproblem(subproblem_local::Vector{Dict{Any,Any}},planning
     return local_sol
 end
 
-function solve_subproblem(EP::Model,planning_sol::NamedTuple,planning_variables_sub::Vector{String})
+function solve_subproblem(EP::GenXModel,planning_sol::NamedTuple,planning_variables_sub::Vector{String})
 
 	
 	fix_planning_variables!(EP,planning_sol,planning_variables_sub)
@@ -194,7 +194,7 @@ function solve_subproblem(EP::Model,planning_sol::NamedTuple,planning_variables_
 
 end
 
-function fix_planning_variables!(EP::Model,planning_sol::NamedTuple,planning_variables_sub::Vector{String})
+function fix_planning_variables!(EP::GenXModel,planning_sol::NamedTuple,planning_variables_sub::Vector{String})
 	for y in planning_variables_sub
 		vy = variable_by_name(EP,y);
 		fix(vy,planning_sol.values[y];force=true)

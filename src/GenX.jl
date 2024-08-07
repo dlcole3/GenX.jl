@@ -41,6 +41,7 @@ using Distributed
 using DistributedArrays
 using ClusterManagers
 using Gurobi
+using Plasmo
 
 # Global scaling factor used when ParameterScale is on to shift values from MW to GW
 # DO NOT CHANGE THIS (Unless you do so very carefully)
@@ -54,6 +55,12 @@ function __init__()
     GRB_ENV[] = Gurobi.Env()
     return
 end
+""" 
+
+Union type for the GenX model 
+
+"""
+const GenXModel = Union{OptiNode{OptiGraph},Model};
 
 """
 An abstract type that should be subtyped for users creating GenX resources.

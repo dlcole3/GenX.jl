@@ -1,5 +1,5 @@
 
-function write_planning_solution(path::AbstractString, inputs::Dict, setup::Dict, planning_problem::Model)
+function write_planning_solution(path::AbstractString, inputs::Dict, setup::Dict, planning_problem::GenXModel)
 
     existingcap = value.(planning_problem[:eExistingCap])
 	totcap = value.(planning_problem[:eTotalCap]);

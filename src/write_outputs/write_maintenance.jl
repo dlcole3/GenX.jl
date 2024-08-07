@@ -7,7 +7,7 @@ function write_simple_csv(filename::AbstractString, header::Vector, matrix)
     write_simple_csv(filename, df)
 end
 
-function prepare_timeseries_variables(EP::Model, set::Set{Symbol}, scale::Float64 = 1.0)
+function prepare_timeseries_variables(EP::GenXModel, set::Set{Symbol}, scale::Float64 = 1.0)
     # function to extract data from DenseAxisArray
     data(var) = scale * value.(EP[var]).data
 
@@ -20,9 +20,9 @@ function write_timeseries_variables(EP, set::Set{Symbol}, filename::AbstractStri
 end
 
 @doc raw"""
-    write_maintenance(path::AbstractString, inputs::Dict, EP::Model)
+    write_maintenance(path::AbstractString, inputs::Dict, EP::GenXModel)
 """
-function write_maintenance(path::AbstractString, inputs::Dict, EP::Model)
+function write_maintenance(path::AbstractString, inputs::Dict, EP::GenXModel)
     downvars = maintenance_down_variables(inputs)
     write_timeseries_variables(EP, downvars, joinpath(path, "maint_down.csv"))
 end

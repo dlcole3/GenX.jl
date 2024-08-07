@@ -1,10 +1,10 @@
 @doc raw"""
-	write_curtailment(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
+	write_curtailment(path::AbstractString, inputs::Dict, setup::Dict, EP::GenXModel)
 
 Function for writing the curtailment values of the different variable renewable resources (both standalone and 
 	co-located).
 """
-function write_curtailment(path::AbstractString, inputs::Dict, setup::Dict, EP::Model)
+function write_curtailment(path::AbstractString, inputs::Dict, setup::Dict, EP::GenXModel)
     gen = inputs["RESOURCES"]
     G = inputs["G"]     # Number of resources (generators, storage, DR, and DERs)
     T = inputs["T"]     # Number of time steps (hours)

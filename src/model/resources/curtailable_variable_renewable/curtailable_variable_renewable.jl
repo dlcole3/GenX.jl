@@ -1,5 +1,5 @@
 @doc raw"""
-	curtailable_variable_renewable!(EP::Model, inputs::Dict, setup::Dict)
+	curtailable_variable_renewable!(EP::GenXModel, inputs::Dict, setup::Dict)
 This function defines the constraints for operation of variable renewable energy (VRE) resources whose output can be curtailed (``y \in \mathcal{VRE}``), such as utility-scale solar PV or wind power resources or run-of-river hydro resources that can spill water.
 The operational constraints for VRE resources are a function of each technology's time-dependent hourly capacity factor (or availability factor, ``\rho^{max}_{y,z,t}``), in per unit terms, and the total available capacity (``\Delta^{total}_{y,z}``).
 
@@ -85,7 +85,7 @@ function curtailable_variable_renewable!(EP, inputs::Dict, setup::Dict)
 end
 
 @doc raw"""
-	curtailable_variable_renewable_operational_reserves!(EP::Model, inputs::Dict)
+	curtailable_variable_renewable_operational_reserves!(EP::GenXModel, inputs::Dict)
 When modeling operating reserves, this function is called by ```curtailable_variable_renewable()```, which modifies the constraint for maximum power output in each time step from VRE resources to account for procuring some of the available capacity for frequency regulation ($f_{y,z,t}$) and upward operating (spinning) reserves ($r_{y,z,t}$).
 ```math
 \begin{aligned}

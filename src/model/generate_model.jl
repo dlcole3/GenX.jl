@@ -108,7 +108,7 @@ function generate_model(setup::Dict, inputs::Dict, OPTIMIZER::MOI.OptimizerWithA
 
 end
 
-function operation_model!(EP::Model,setup::Dict, inputs::Dict)
+function operation_model!(EP::GenXModel,setup::Dict, inputs::Dict)
 
     T = inputs["T"]     # Number of time steps (hours)
     Z = inputs["Z"]     # Number of zones
@@ -270,7 +270,7 @@ function operation_model!(EP::Model,setup::Dict, inputs::Dict)
 
 end
 
-function planning_model!(EP::Model,setup::Dict, inputs::Dict)
+function planning_model!(EP::GenXModel,setup::Dict, inputs::Dict)
    
 
     if setup["MinCapReq"] == 1

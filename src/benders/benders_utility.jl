@@ -54,7 +54,7 @@ function generate_benders_inputs(setup::Dict,inputs::Dict,inputs_decomp::Dict)
 
 end
 
-function check_negative_capacities(EP::Model)
+function check_negative_capacities(EP::GenXModel)
 
 	neg_cap_bool = false;
 	tol = -1e-8;

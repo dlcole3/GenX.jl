@@ -1,5 +1,5 @@
 @doc raw"""
-	long_duration_storage!(EP::Model, inputs::Dict, setup::Dict)
+	long_duration_storage!(EP::GenXModel, inputs::Dict, setup::Dict)
 This function creates variables and constraints enabling modeling of long duration storage resources when modeling representative time periods.\
 
 **Storage inventory balance at beginning of each representative period**
@@ -202,7 +202,7 @@ function long_duration_storage!(EP, inputs::Dict, setup::Dict)
 end
 
 
-function long_duration_storage_subperiod!(EP::Model, inputs::Dict, setup::Dict)
+function long_duration_storage_subperiod!(EP::GenXModel, inputs::Dict, setup::Dict)
     println("Long Duration Storage Sub-period Module")
 
     w = inputs["SubPeriod"];
@@ -292,7 +292,7 @@ function long_duration_storage_subperiod!(EP::Model, inputs::Dict, setup::Dict)
 end
 
 
-function long_duration_storage_planning!(EP::Model, inputs::Dict, setup::Dict)
+function long_duration_storage_planning!(EP::GenXModel, inputs::Dict, setup::Dict)
     println("Long Duration Storage Planning Module")
 
     CapacityReserveMargin = setup["CapacityReserveMargin"]

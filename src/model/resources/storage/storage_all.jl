@@ -1,5 +1,5 @@
 @doc raw"""
-	storage_all!(EP::Model, inputs::Dict, setup::Dict)
+	storage_all!(EP::GenXModel, inputs::Dict, setup::Dict)
 
 Sets up variables and constraints common to all storage resources. See ```storage()``` in ```storage.jl``` for description of constraints.
 """
