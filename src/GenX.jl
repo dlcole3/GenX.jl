@@ -60,7 +60,7 @@ end
 Union type for the GenX model 
 
 """
-const GenXModel = Union{OptiNode{OptiGraph},Model};
+const GenXModel = Union{OptiNode,Model};
 
 """
 An abstract type that should be subtyped for users creating GenX resources.
@@ -92,5 +92,6 @@ include("time_domain_reduction/precluster.jl")
 include_all_in_folder("multi_stage")
 include_all_in_folder("additional_tools")
 include_all_in_folder("benders") 
- 
+include_all_in_folder("graph_model") 
+
 end
