@@ -38,10 +38,7 @@ PLANNING_OPTIMIZER = GenX.optimizer_with_attributes(()->Gurobi.Optimizer(GRB_ENV
 SUBPROB_OPTIMIZER = GenX.optimizer_with_attributes(()->Gurobi.Optimizer(GRB_ENV),"BarConvTol"=>1e-3,"Method"=>2,"Crossover"=>1)
 
 model = GenX.generate_model(mysetup,myinputs,OPTIMIZER);
-model_old = GenX.generate_model_legacy(mysetup,myinputs,OPTIMIZER);
 GenX.optimize!(model)
-GenX.optimize!(model_old)
-println(abs(GenX.objective_value(model) - GenX.objective_value(model_old)))
 
 mysetup["Benders"] = 1;
 
