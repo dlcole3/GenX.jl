@@ -51,8 +51,3 @@ decomp_subproblems = Dict();
 for w in keys(myinputs_decomp)
     decomp_subproblems[w] = GenX.generate_operation_subproblem(mysetup, myinputs_decomp[w], SUBPROB_OPTIMIZER);
 end
-
-
-
-
-
