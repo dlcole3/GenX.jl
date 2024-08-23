@@ -3,14 +3,27 @@
 ###### ###### ###### ###### ###### ######
 
 # Single element version
-function create_empty_expression!(EP, exprname::Symbol)
+function create_empty_expression!(EP::JuMP.Model, exprname::Symbol)
     EP[exprname] = AffExpr(0.0)
+    return nothing
+end
+# Single element version
+function create_empty_expression!(EP::Plasmo.OptiNode, exprname::Symbol)
+    EP[exprname] = GenericAffExpr{Float64, Plasmo.NodeVariableRef}(0.0)
     return nothing
 end
 
 # Vector version, to avoid needing to wrap the dimension in a tuple or array
-function create_empty_expression!(EP, exprname::Symbol, dim1::Int64)
+function create_empty_expression!(EP::JuMP.Model, exprname::Symbol, dim1::Int64)
     temp = Array{AffExpr}(undef, dim1)
+    fill_with_zeros!(temp)
+    EP[exprname] = temp
+    return nothing
+end
+
+# Vector version, to avoid needing to wrap the dimension in a tuple or array
+function create_empty_expression!(EP::Plasmo.OptiNode, exprname::Symbol, dim1::Int64)
+    temp = Array{GenericAffExpr{Float64, Plasmo.NodeVariableRef}}(undef, dim1)
     fill_with_zeros!(temp)
     EP[exprname] = temp
     return nothing
@@ -25,7 +38,7 @@ This can lead to errors later if a method can only operate on expressions.
 
 We don't currently have a method to do this with non-contiguous indexing.
 """
-function create_empty_expression!(EP,
+function create_empty_expression!(EP::JuMP.Model,
         exprname::Symbol,
         dims::NTuple{N, Int64}) where {N}
     temp = Array{AffExpr}(undef, dims)
@@ -34,13 +47,31 @@ function create_empty_expression!(EP,
     return nothing
 end
 
+function create_empty_expression!(EP::Plasmo.OptiNode,
+    exprname::Symbol,
+    dims::NTuple{N, Int64}) where {N}
+temp = Array{GenericAffExpr{Float64, Plasmo.NodeVariableRef}}(undef, dims)
+fill_with_zeros!(temp)
+EP[exprname] = temp
+return nothing
+end
+
 # Version with the dimensions wrapped in an array. This requires slightly more memory than using tuples
-function create_empty_expression!(EP, exprname::Symbol, dims::Vector{Int64})
+function create_empty_expression!(EP::JuMP.Model, exprname::Symbol, dims::Vector{Int64})
     temp = Array{AffExpr}(undef, dims...)
     fill_with_zeros!(temp)
     EP[exprname] = temp
     return nothing
 end
+
+# Version with the dimensions wrapped in an array. This requires slightly more memory than using tuples
+function create_empty_expression!(EP::Plasmo.OptiNode, exprname::Symbol, dims::Vector{Int64})
+    temp = Array{GenericAffExpr{Float64, Plasmo.NodeVariableRef}}(undef, dims...)
+    fill_with_zeros!(temp)
+    EP[exprname] = temp
+    return nothing
+end
+
 
 ###### ###### ###### ###### ###### ######
 # Fill dense arrays of expressions with zeros or a constant
@@ -51,9 +82,16 @@ end
 
 Fill an array of expressions with zeros in-place.
 """
-function fill_with_zeros!(arr::AbstractArray{GenericAffExpr{C, T}, dims}) where {C, T, dims}
+function fill_with_zeros!(arr::AbstractArray{GenericAffExpr{C, T}, dims}) where {C, T <: VariableRef, dims}
     for i::Int64 in eachindex(IndexLinear(), arr)::Base.OneTo{Int64}
         arr[i] = AffExpr(0.0)
+    end
+    return nothing
+end
+
+function fill_with_zeros!(arr::AbstractArray{GenericAffExpr{C, T}, dims}) where {C, T <: Plasmo.NodeVariableRef, dims}
+    for i::Int64 in eachindex(IndexLinear(), arr)::Base.OneTo{Int64}
+        arr[i] = GenericAffExpr{Float64, Plasmo.NodeVariableRef}(0.0)
     end
     return nothing
 end
@@ -67,11 +105,19 @@ In the future we could expand this to non AffExpr, using GenericAffExpr
 e.g. if we wanted to use Float32 instead of Float64
 """
 function fill_with_const!(arr::AbstractArray{GenericAffExpr{C, T}, dims},
-        con::Real) where {C, T, dims}
+        con::Real) where {C, T<:VariableRef, dims}
     for i in eachindex(arr)
         arr[i] = AffExpr(con)
     end
     return nothing
+end
+
+function fill_with_const!(arr::AbstractArray{GenericAffExpr{C, T}, dims},
+    con::Real) where {C, T<:Plasmo.NodeVariableRef, dims}
+for i in eachindex(arr)
+    arr[i] = GenericAffExpr{Float64, Plasmo.NodeVariableRef}(con)
+end
+return nothing
 end
 
 ###### ###### ###### ###### ###### ######
@@ -90,6 +136,17 @@ function extract_time_series_to_expression(var::Matrix{VariableRef},
     return expr
 end
 
+function extract_time_series_to_expression(var::Matrix{Plasmo.NodeVariableRef},
+    set::AbstractVector{Int})
+TIME_DIM = 2
+time_range = 1:size(var)[TIME_DIM]
+
+aff_exprs_data = GenericAffExpr{Float64, Plasmo.NodeVariableRef}.(0, var[set, :] .=> 1)
+new_axes = (set, time_range)
+expr = JuMP.Containers.DenseAxisArray(aff_exprs_data, new_axes...)
+return expr
+end
+
 function extract_time_series_to_expression(
         var::JuMP.Containers.DenseAxisArray{
             VariableRef,
@@ -105,6 +162,23 @@ function extract_time_series_to_expression(
     new_axes = (set, time_range)
     expr = JuMP.Containers.DenseAxisArray(aff_exprs.data, new_axes...)
     return expr
+end
+
+function extract_time_series_to_expression(
+    var::JuMP.Containers.DenseAxisArray{
+        Plasmo.NodeVariableRef,
+        2,
+        Tuple{X, Base.OneTo{Int64}},
+        Y
+    },
+    set::AbstractVector{Int}) where {X, Y}
+TIME_DIM = 2
+time_range = var.axes[TIME_DIM]
+
+aff_exprs = GenericAffExpr{Plasmo.NodeVariableRef}.(0, var[set, :] .=> 1)
+new_axes = (set, time_range)
+expr = JuMP.Containers.DenseAxisArray(aff_exprs.data, new_axes...)
+return expr
 end
 
 ###### ###### ###### ###### ###### ######
