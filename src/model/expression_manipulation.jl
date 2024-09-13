@@ -114,10 +114,10 @@ end
 
 function fill_with_const!(arr::AbstractArray{GenericAffExpr{C, T}, dims},
     con::Real) where {C, T<:Plasmo.NodeVariableRef, dims}
-for i in eachindex(arr)
-    arr[i] = GenericAffExpr{Float64, Plasmo.NodeVariableRef}(con)
-end
-return nothing
+    for i in eachindex(arr)
+        arr[i] = GenericAffExpr{Float64, Plasmo.NodeVariableRef}(con)
+    end
+    return nothing
 end
 
 ###### ###### ###### ###### ###### ######
@@ -138,13 +138,13 @@ end
 
 function extract_time_series_to_expression(var::Matrix{Plasmo.NodeVariableRef},
     set::AbstractVector{Int})
-TIME_DIM = 2
-time_range = 1:size(var)[TIME_DIM]
+    TIME_DIM = 2
+    time_range = 1:size(var)[TIME_DIM]
 
-aff_exprs_data = GenericAffExpr{Float64, Plasmo.NodeVariableRef}.(0, var[set, :] .=> 1)
-new_axes = (set, time_range)
-expr = JuMP.Containers.DenseAxisArray(aff_exprs_data, new_axes...)
-return expr
+    aff_exprs_data = GenericAffExpr{Float64, Plasmo.NodeVariableRef}.(0, var[set, :] .=> 1)
+    new_axes = (set, time_range)
+    expr = JuMP.Containers.DenseAxisArray(aff_exprs_data, new_axes...)
+    return expr
 end
 
 function extract_time_series_to_expression(
@@ -172,13 +172,13 @@ function extract_time_series_to_expression(
         Y
     },
     set::AbstractVector{Int}) where {X, Y}
-TIME_DIM = 2
-time_range = var.axes[TIME_DIM]
+    TIME_DIM = 2
+    time_range = var.axes[TIME_DIM]
 
-aff_exprs = GenericAffExpr{Plasmo.NodeVariableRef}.(0, var[set, :] .=> 1)
-new_axes = (set, time_range)
-expr = JuMP.Containers.DenseAxisArray(aff_exprs.data, new_axes...)
-return expr
+    aff_exprs = GenericAffExpr{Plasmo.NodeVariableRef}.(0, var[set, :] .=> 1)
+    new_axes = (set, time_range)
+    expr = JuMP.Containers.DenseAxisArray(aff_exprs.data, new_axes...)
+    return expr
 end
 
 ###### ###### ###### ###### ###### ######

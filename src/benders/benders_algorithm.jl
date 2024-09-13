@@ -1,6 +1,6 @@
 
 function benders(benders_inputs::Dict{Any,Any},setup::Dict)
-	
+
     #### Algorithm from:
     ### Pecci, F. and Jenkins, J. D. “Regularized Benders Decomposition for High Performance Capacity Expansion Models”. arXiv:2403.02559 [math]. URL: http://arxiv.org/abs/2403.02559.
 
@@ -15,7 +15,7 @@ function benders(benders_inputs::Dict{Any,Any},setup::Dict)
 
 	subproblems = benders_inputs["subproblems"];
 	planning_variables_sub = benders_inputs["planning_variables_sub"];
-    
+
     #### Algorithm parameters:
 	MaxIter = setup["BD_MaxIter"]
     ConvTol = setup["BD_ConvTol"]
@@ -50,11 +50,11 @@ function benders(benders_inputs::Dict{Any,Any},setup::Dict)
 
     #### Run Benders iterations
     for k = 0:MaxIter
-		
+
 		start_subop_sol = time();
 
         subop_sol = solve_dist_subproblems(subproblems,planning_sol);
-        
+
 		cpu_subop_sol = time()-start_subop_sol;
 		println("Solving the subproblems required $cpu_subop_sol seconds")
 
@@ -68,7 +68,7 @@ function benders(benders_inputs::Dict{Any,Any},setup::Dict)
 		time_start_update = time()
 
 		update_planning_problem_multi_cuts!(planning_problem,subop_sol,planning_sol,planning_variables_sub)
-		
+
 		time_planning_update = time()-time_start_update
 		println("done (it took $time_planning_update s).")
 
@@ -78,7 +78,8 @@ function benders(benders_inputs::Dict{Any,Any},setup::Dict)
 		println("Solving the planning problem required $cpu_planning_sol seconds")
 
 		LB = max(LB,unst_planning_sol.LB);
-		
+
+        println(LB)
 		append!(LB_hist,LB)
         append!(UB_hist,UB)
 		append!(feasibility_hist,sum(subop_sol[w].feasibility_slack for w in keys(subop_sol)))
@@ -145,10 +146,13 @@ function benders(benders_inputs::Dict{Any,Any},setup::Dict)
 end
 
 function update_planning_problem_multi_cuts!(EP::GenXModel,subop_sol::Dict,planning_sol::NamedTuple,planning_variables_sub::Dict)
-    
-	W = keys(subop_sol);
-	
-    @constraint(EP,[w in W],subop_sol[w].theta_coeff*EP[:vTHETA][w] >= subop_sol[w].op_cost + sum(subop_sol[w].lambda[i]*(variable_by_name(EP,planning_variables_sub[w][i]) - planning_sol.values[planning_variables_sub[w][i]]) for i in 1:length(planning_variables_sub[w])));
 
-       
+	W = keys(subop_sol);
+
+    @constraint(EP,[w in W],subop_sol[w].theta_coeff*EP[:vTHETA][w] >= subop_sol[w].op_cost + sum(subop_sol[w].lambda[i]*(variable_by_name(EP,planning_variables_sub[w][i]) - planning_sol.values[planning_variables_sub[w][i]]) for i in 1:length(planning_variables_sub[w])));
+    for w in W
+        println(w)
+        println(sum(subop_sol[w].lambda[i]*(variable_by_name(EP,planning_variables_sub[w][i]) - planning_sol.values[planning_variables_sub[w][i]]) for i in 1:length(planning_variables_sub[w])))
+    end
+
 end
