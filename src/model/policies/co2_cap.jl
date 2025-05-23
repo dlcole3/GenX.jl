@@ -65,7 +65,7 @@ Similarly, a generation based emission constraint is defined by setting the emis
 
 Note that the generator-side rate-based constraint can be used to represent a fee-rebate (``feebate'') system: the dirty generators that emit above the bar ($\epsilon_{z,p,gen}^{maxCO_2}$) have to buy emission allowances from the emission regulator in the region $z$ where they are located; in the same vein, the clean generators get rebates from the emission regulator at an emission allowance price being the dual variable of the emissions rate constraint.
 """
-function co2_cap!(EP, inputs::Dict, setup::Dict)
+function co2_cap!(EP::Model, inputs::Dict, setup::Dict)
     println("CO2 Policies Module")
 
     SEG = inputs["SEG"]  # Number of lines
@@ -121,4 +121,81 @@ function co2_cap!(EP, inputs::Dict, setup::Dict)
                 EP[:eGenerationByZone][z, t]
             for t in 1:T, z in findall(x -> x == 1, inputs["dfCO2CapZones"][:, cap])))
     end
+end
+
+
+function co2_cap_subperiod!(EP::Model, inputs::Dict, setup::Dict)
+    println("CO2 Policies Operation Module")
+
+    SEG = inputs["SEG"]  # Number of lines
+    T = inputs["T"]     # Number of time steps (hours)
+    w = inputs["SubPeriod"];
+    ## Variable ###
+    # if input files are present, add CO2 cap slack variables
+    if haskey(inputs, "dfCO2Cap_slack")
+        @variable(EP, vCO2Cap_slack[cap = 1:inputs["NCO2Cap"]]>=0)
+
+        @expression(EP, eCCO2Cap_slack[cap = 1:inputs["NCO2Cap"]],
+            inputs["dfCO2Cap_slack"][cap, :PriceCap]*EP[:vCO2Cap_slack][cap])
+        @expression(EP, eCTotalCO2CapSlack,
+            sum(EP[:eCCO2Cap_slack][cap] for cap in 1:inputs["NCO2Cap"]))
+
+        add_to_expression!(EP[:eObj], eCTotalCO2CapSlack)
+    else
+        @variable(EP, vCO2Cap_slack[cap = 1:inputs["NCO2Cap"]]==0)
+    end
+    @variable(EP,vCO2budget[[w],1:inputs["NCO2Cap"]])
+
+    ## Mass-based: Emissions constraint in absolute emissions limit (tons)
+    if setup["CO2Cap"] == 1
+        @constraint(EP, cCO2Emissions_systemwide[cap = 1:inputs["NCO2Cap"]],
+            sum(inputs["omega"][t] * EP[:eEmissionsByZone][z, t]
+            for z in findall(x -> x == 1, inputs["dfCO2CapZones"][:, cap]), t in 1:T) -
+            vCO2Cap_slack[cap]<=vCO2budget[w,cap])
+
+        ## (fulfilled) demand + Rate-based: Emissions constraint in terms of rate (tons/MWh)
+    elseif setup["CO2Cap"] == 2 ##This part moved to non_served_energy.jl
+        @constraint(EP, cCO2Emissions_systemwide[cap = 1:inputs["NCO2Cap"]],
+            sum(inputs["omega"][t] * EP[:eEmissionsByZone][z, t]
+            for z in findall(x -> x == 1, inputs["dfCO2CapZones"][:, cap]), t in 1:T) -
+            vCO2Cap_slack[cap]<= vCO2budget[w,cap] +
+            sum(inputs["dfMaxCO2Rate"][z, cap] * sum(inputs["omega"][t] *
+                    (-sum(EP[:vNSE][s, t, z] for s in 1:SEG))
+                for t in 1:T)
+            for z in findall(x -> x == 1, inputs["dfCO2CapZones"][:, cap])) +
+            sum(inputs["dfMaxCO2Rate"][z, cap] * setup["StorageLosses"] *
+                EP[:eELOSSByZone][z]
+            for z in findall(x -> x == 1, inputs["dfCO2CapZones"][:, cap])))
+
+        ## Generation + Rate-based: Emissions constraint in terms of rate (tons/MWh)
+    elseif (setup["CO2Cap"] == 3)
+        @constraint(EP, cCO2Emissions_systemwide[cap = 1:inputs["NCO2Cap"]],
+            sum(inputs["omega"][t] * EP[:eEmissionsByZone][z, t]
+            for z in findall(x -> x == 1, inputs["dfCO2CapZones"][:, cap]), t in 1:T) -
+            vCO2Cap_slack[cap]<= vCO2budget[w,cap] + 
+            sum(inputs["dfMaxCO2Rate"][z, cap] * inputs["omega"][t] *
+                EP[:eGenerationByZone][z, t]
+            for t in 1:T, z in findall(x -> x == 1, inputs["dfCO2CapZones"][:, cap])))
+    end
+end
+
+function co2_cap_planning!(EP::Model, inputs::Dict, setup::Dict)
+    println("CO2 Policies Planning Module")
+
+    @variable(EP,vCO2budget[w=1:inputs["REP_PERIOD"],cap=1:inputs["NCO2Cap"]])
+
+    T = inputs["T"]     # Number of time steps (hours)
+    if setup["CO2Cap"] == 1
+
+		@constraint(EP, cCO2Emissions_systemwide_planning[cap=1:inputs["NCO2Cap"]], sum(vCO2budget[w,cap] for w in 1:inputs["REP_PERIOD"]) == sum(inputs["dfMaxCO2"][z, cap]
+        for z in findall(x -> x == 1, inputs["dfCO2CapZones"][:, cap])))
+		
+	elseif setup["CO2Cap"] == 2
+		@constraint(EP, cCO2Emissions_systemwide_planning[cap=1:inputs["NCO2Cap"]],
+			sum(vCO2budget[w,cap] for w in 1:inputs["REP_PERIOD"]) == sum(inputs["dfMaxCO2Rate"][z, cap] * sum(inputs["omega"][t] *inputs["pD"][t, z] for t in 1:T) for z in findall(x -> x == 1, inputs["dfCO2CapZones"][:, cap])))
+
+	elseif setup["CO2Cap"]==3
+		@constraint(EP, cCO2Emissions_systemwide_planning[cap=1:inputs["NCO2Cap"]],sum(vCO2budget[w,cap] for w in 1:inputs["REP_PERIOD"])==0)
+	end
+
 end

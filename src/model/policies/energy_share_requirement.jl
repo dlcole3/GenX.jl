@@ -23,7 +23,7 @@ If ```StorageLosses=0```, this term is removed from the constraint.
 In practice, most existing renewable portfolio standard policies do not account for storage losses when determining energy share requirements.
 However, with 100% RPS or CES policies enacted in several jurisdictions, policy makers may wish to include storage losses in the minimum energy share, as otherwise there will be a difference between total generation and total demand that will permit continued use of non-qualifying resources (e.g. emitting generators).
 """
-function energy_share_requirement!(EP, inputs::Dict, setup::Dict)
+function energy_share_requirement!(EP::Model, inputs::Dict, setup::Dict)
     println("Energy Share Requirement Policies Module")
 
     # if input files are present, add energy share requirement slack variables
@@ -43,4 +43,35 @@ function energy_share_requirement!(EP, inputs::Dict, setup::Dict)
 
     ## Energy Share Requirements (minimum energy share from qualifying renewable resources) constraint
     @constraint(EP, cESRShare[ESR = 1:inputs["nESR"]], EP[:eESR][ESR]>=0)
+end
+
+function energy_share_requirement_subperiod!(EP::Model, inputs::Dict, setup::Dict)
+    println("Energy Share Requirement Policies Operation Module")
+    w = inputs["SubPeriod"];
+    # if input files are present, add energy share requirement slack variables
+    if haskey(inputs, "dfESR_slack")
+        @variable(EP, vESR_slack[ESR = 1:inputs["nESR"]]>=0)
+        add_similar_to_expression!(EP[:eESR], vESR_slack)
+
+        @expression(EP,
+            eCESRSlack[ESR = 1:inputs["nESR"]],
+            inputs["dfESR_slack"][ESR, :PriceCap]*EP[:vESR_slack][ESR])
+        @expression(EP,
+            eCTotalESRSlack,
+            sum(EP[:eCESRSlack][ESR] for ESR in 1:inputs["nESR"]))
+
+        add_to_expression!(EP[:eObj], eCTotalESRSlack)
+    end
+    @variable(EP,vESRbudget[[w],1:inputs["nESR"]])
+
+    ## Energy Share Requirements (minimum energy share from qualifying renewable resources) constraint
+    @constraint(EP, cESRShare[ESR = 1:inputs["nESR"]], EP[:eESR][ESR]>=vESRbudget[w,ESR])
+end
+
+function energy_share_requirement_planning!(EP::Model, inputs::Dict, setup::Dict)
+    println("Energy Share Requirement Policies Planning Module")
+    
+    @variable(EP,vESRbudget[w=1:inputs["REP_PERIOD"],ESR=1:inputs["nESR"]])
+
+    @constraint(EP,cESRShare_planning[ESR=1:inputs["nESR"]],sum(vESRbudget[w,ESR] for w in 1:inputs["REP_PERIOD"]) ==0)
 end
