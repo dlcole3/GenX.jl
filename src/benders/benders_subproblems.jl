@@ -3,6 +3,16 @@ function generate_operation_subproblem(setup::Dict, inputs::Dict, OPTIMIZER::MOI
 
     ## Start pre-solve timer
     presolver_start_time = time()
+
+    # if using gpu, we will need to comment out the code as follows: 
+    # This also means we will need to add CUDA, KernelAbstractions, and MadNLPGPU to the environment
+        # using CUDA, KernelAbstractions, MadNLPGPU
+
+        # c = rand(10)
+        # model = Model(MadIPM.Optimizer)
+        # set_optimizer_attribute(model, "array_type", CuVector{Float64})
+        # set_optimizer_attribute(model, "linear_solver", MadNLPGPU.CUDSSSolver)
+    # see here: https://github.com/MadNLP/MadIPM.jl#:~:text=If%20you%20have%20a%20JUMP%20model%2C%20just%20set%20the%20array%20type%20for%20CUDA%20arrays%3A
     EP = Model(OPTIMIZER)
 
     #set_string_names_on_creation(EP, Bool(setup["EnableJuMPStringNames"]))
