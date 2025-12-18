@@ -53,7 +53,7 @@ function configure_benders_planning_solver(solver_settings_path::String)
 	println("Planning Gurobi attributes:")
 	display(attributes)
 
-    OPTIMIZER = optimizer_with_attributes(()->Gurobi.Optimizer(GRB_ENV[]),attributes...)
+    OPTIMIZER = optimizer_with_attributes(()->Gurobi.Optimizer(Gurobi.Env()),attributes...)
 	
 	return OPTIMIZER
 end

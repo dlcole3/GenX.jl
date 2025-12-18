@@ -90,6 +90,7 @@ function run_genx_case_simple!(case::AbstractString, mysetup::Dict, optimizer::A
 
     println("Solving Model")
     EP, solve_time = solve_model(EP, mysetup)
+    println("NUMBER OF VARIBLES = ", length(all_variables(EP)))
     myinputs["solve_time"] = solve_time # Store the model solve time in myinputs
 
     # Run MGA if the MGA flag is set to 1 else only save the least cost solution
