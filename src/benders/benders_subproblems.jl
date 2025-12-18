@@ -7,10 +7,10 @@ function generate_operation_subproblem(setup::Dict, inputs::Dict, OPTIMIZER::MOI
     # if using gpu, we will need to comment out the code as follows: 
     # This also means we will need to add CUDA, KernelAbstractions, and MadNLPGPU to the environment
     EP = Model(OPTIMIZER)
-    if haskey(setup, "use_gpu") ? Bool(setup["use_gpu"]) : false
-        set_optimizer_attribute(EP, "array_type", CuVector{Float64})
-        set_optimizer_attribute(EP, "linear_solver", MadNLPGPU.CUDSSSolver)
-    end
+    #if haskey(setup, "use_gpu") ? Bool(setup["use_gpu"]) : false
+    #    set_optimizer_attribute(EP, "array_type", CuVector{Float64})
+     #  set_optimizer_attribute(EP, "linear_solver", MadNLPGPU.CUDSSSolver)
+    #end
     # see here: https://github.com/MadNLP/MadIPM.jl#:~:text=If%20you%20have%20a%20JUMP%20model%2C%20just%20set%20the%20array%20type%20for%20CUDA%20arrays%3A
 
     #set_string_names_on_creation(EP, Bool(setup["EnableJuMPStringNames"]))
@@ -40,7 +40,7 @@ function init_subproblem(setup::Dict, inputs::Dict, OPTIMIZER::MOI.OptimizerWith
 
     set_silent(EP)
 
-    planning_variables_sub = intersect(name.(all_variables(EP)),planning_variables);
+    planning_variables_sub = intersect(JuMP.name.(all_variables(EP)),planning_variables);
 
 	for sv in planning_variables_sub
 		if has_lower_bound(variable_by_name(EP,sv))
@@ -79,7 +79,11 @@ function init_dist_subproblems(setup::Dict,inputs_decomp::Dict,planning_variable
         @async @spawnat p begin
             W_local = localindices(subproblems_all)[1];
             inputs_local = [inputs_decomp[k] for k in W_local];
-			SUBPROB_OPTIMIZER =  configure_benders_subprob_solver(setup["settings_path"]);
+            if haskey(setup, "use_gpu") ? Bool(setup["use_gpu"]) : false
+                SUBPROB_OPTIMIZER = optimizer_with_attributes(MadIPM.Optimizer, "array_type" => CuVector{Float64}, "linear_solver" => MadNLPGPU.CUDSSSolver)
+            else
+			    SUBPROB_OPTIMIZER =  configure_benders_subprob_solver(setup["settings_path"]);
+            end
             init_local_subproblems!(setup,inputs_local,localpart(subproblems_all),planning_variables,SUBPROB_OPTIMIZER);
         end
     end

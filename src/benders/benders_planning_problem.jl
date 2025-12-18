@@ -33,7 +33,7 @@ function init_planning_problem(setup::Dict,inputs::Dict)
 
     EP =  generate_planning_problem(setup, inputs, OPTIMIZER);
 
-	varnames = name.(setdiff(all_variables(EP),[EP[:vZERO];EP[:vTHETA]]));
+	varnames = JuMP.name.(setdiff(all_variables(EP),[EP[:vZERO];EP[:vTHETA]]));
 
 	set_silent(EP);
 
