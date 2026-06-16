@@ -74,8 +74,8 @@ function non_served_energy!(EP::Model, inputs::Dict, setup::Dict)
 
     # Sum individual demand segment contributions to non-served energy costs to get total non-served energy costs
     # Julia is fastest when summing over one row one column at a time
-    @expression(EP, eTotalCNSETS[t = 1:T, z = 1:Z], sum(eCNSE[s, t, z] for s in 1:SEG))
-    @expression(EP, eTotalCNSET[t = 1:T], sum(eTotalCNSETS[t, z] for z in 1:Z))
+    @expression(EP, eTotalCNSETZ[t = 1:T, s = 1:SEG], sum(eCNSE[s, t, z] for z in 1:Z))
+    @expression(EP, eTotalCNSET[t = 1:T], sum(eTotalCNSETZ[t, s] for s in 1:SEG))
     @expression(EP, eTotalCNSE, sum(eTotalCNSET[t] for t in 1:T))
 
     # Add total cost contribution of non-served energy/curtailed demand to the objective function
