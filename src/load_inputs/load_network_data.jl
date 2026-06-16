@@ -118,7 +118,7 @@ Loads the network map from a list-style interface
 """
 function load_network_map_from_list(network_var::DataFrame, Z, L, list_columns)
     start_col, end_col = list_columns
-    mat = zeros(L, Z)
+    mat = SparseArrays.spzeros(L, Z)
     start_zones = collect(skipmissing(network_var[!, start_col]))
     end_zones = collect(skipmissing(network_var[!, end_col]))
     for l in 1:L

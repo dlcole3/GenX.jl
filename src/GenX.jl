@@ -42,6 +42,7 @@ using MacroEnergySolvers
 using Distributed
 using DistributedArrays
 using ClusterManagers
+using SparseArrays
 
 using PrecompileTools: @compile_workload
 

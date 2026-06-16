@@ -29,6 +29,16 @@ function dcopf_transmission!(EP::Model, inputs::Dict, setup::Dict)
     Z = inputs["Z"]     # Number of zones
     L = inputs["L"]     # Number of transmission lines
 
+    
+    I, J, V = findnz(inputs["pNet_Map"])  # I=row index, J=col index, V=value
+    nz_by_row = [Vector{Tuple{Int, Float64}}() for _ in 1:L]
+    nz_by_col = [Vector{Tuple{Int, Float64}}() for _ in 1:Z]
+
+    for k in eachindex(V)
+        push!(nz_by_row[I[k]], (J[k], V[k]))
+        push!(nz_by_col[J[k]], (I[k], V[k]))
+    end
+
     ### DC-OPF variables ###
 
     # Voltage angle variables of each zone "z" at hour "t" 
@@ -38,21 +48,20 @@ function dcopf_transmission!(EP::Model, inputs::Dict, setup::Dict)
 
     # Power flow constraint:: vFLOW = DC_OPF_coeff * (vANGLE[START_ZONE] - vANGLE[END_ZONE])
     @constraint(EP,
-        cPOWER_FLOW_OPF[l = 1:L, t = 1:T],
-        EP[:vFLOW][l,
-            t]==inputs["pDC_OPF_coeff"][l] *
-                sum(inputs["pNet_Map"][l, z] * vANGLE[z, t] for z in 1:Z))
+            cPOWER_FLOW_OPF[l = 1:L, t = 1:T],
+            EP[:vFLOW][l, t]==inputs["pDC_OPF_coeff"][l] *
+                    sum(v * vANGLE[Int(z), t] for (z, v) in nz_by_row[l]))
 
     # Bus angle limits (except slack bus)
     @constraints(EP,
-        begin
-            cANGLE_ub[l = 1:L, t = 1:T],
-            sum(inputs["pNet_Map"][l, z] * vANGLE[z, t] for z in 1:Z) <=
-            inputs["Line_Angle_Limit"][l]
-            cANGLE_lb[l = 1:L, t = 1:T],
-            sum(inputs["pNet_Map"][l, z] * vANGLE[z, t] for z in 1:Z) >=
-            -inputs["Line_Angle_Limit"][l]
-        end)
+            begin
+                cANGLE_ub[l = 1:L, t = 1:T],
+                sum(v * vANGLE[Int(z), t] for (z, v) in nz_by_row[l]) <=
+                inputs["Line_Angle_Limit"][l]
+                cANGLE_lb[l = 1:L, t = 1:T],
+                sum(v * vANGLE[Int(z), t] for (z, v) in nz_by_row[l]) >=
+                -inputs["Line_Angle_Limit"][l]
+            end)
 
     # Slack Bus angle limit
     @constraint(EP, cANGLE_SLACK[t = 1:T], vANGLE[1, t]==0)
